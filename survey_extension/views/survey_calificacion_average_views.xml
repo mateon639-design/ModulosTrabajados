@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!-- Form: mostrar Métricas -->
+  <record id="survey_form_inherit_metrics" model="ir.ui.view">
+    <field name="name">survey.survey.form.inherit.metrics</field>
+    <field name="model">survey.survey</field>
+    <field name="inherit_id" ref="survey.survey_survey_view_form"/>
+    <field name="arch" type="xml">
+      <!-- Insertamos al final del sheet para evitar choques con otros módulos -->
+      <xpath expr="//form/sheet" position="inside">
+        <group string="Métricas">
+          <field name="participation_rate" readonly="1"/>
+          <!-- Solo tiene sentido si es calificable -->
+          <field name="average_score" readonly="1" invisible="not is_gradable"/>
+        </group>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- Tree: columnas rápidas -->
+  <record id="survey_tree_inherit_metrics" model="ir.ui.view">
+    <field name="name">survey.survey.tree.inherit.metrics</field>
+    <field name="model">survey.survey</field>
+    <field name="inherit_id" ref="survey.survey_survey_view_tree"/>
+    <field name="arch" type="xml">
+      <xpath expr="//list/field[@name='title']" position="after">
+        <field name="participation_rate"/>
+        <field name="average_score"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>

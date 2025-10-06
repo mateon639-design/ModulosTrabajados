@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!-- Participación (user_input): bloque de puntuación (Odoo 17/18 sin attrs/states) -->
+  <record id="survey_user_input_form_inherit_scores" model="ir.ui.view">
+    <field name="name">survey.user_input.form.inherit.scores</field>
+    <field name="model">survey.user_input</field>
+    <field name="inherit_id" ref="survey.survey_user_input_view_form"/>
+    <field name="arch" type="xml">
+      <!-- Insertamos un bloque dentro del <sheet> -->
+      <xpath expr="//form/sheet" position="inside">
+        <!-- Helper para evaluación de visibilidad -->
+        <field name="is_gradable_rel" invisible="1"/>
+
+        <!-- Nuevo: usar 'invisible="not is_gradable_rel"' en lugar de attrs -->
+        <group string="Resultados (calculados)" invisible="not is_gradable_rel">
+          <field name="x_score_obtained" readonly="1"/>
+          <field name="x_score_total" readonly="1"/>
+          <field name="x_score_percent" readonly="1"/>
+          <field name="x_min_required" readonly="1"/>
+          <field name="x_passed" readonly="1"/>
+        </group>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

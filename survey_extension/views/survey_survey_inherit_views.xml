@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- FORM de encuestas -->
+    <record id="survey_form_inherit_audience" model="ir.ui.view">
+        <field name="name">survey.survey.form.inherit.audience</field>
+        <field name="model">survey.survey</field>
+        <field name="inherit_id" ref="survey.survey_survey_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- NUEVO: Botón en el header -->
+            <xpath expr="//form/header" position="inside">
+                <button name="action_assign_audience"
+                        string="Asignar al público objetivo"
+                        type="object"
+                        class="oe_highlight"
+                        invisible="not audience_category_ids"
+                        help="Crea participaciones (sin enviar correo) para el público objetivo seleccionado."/>
+            </xpath>
+
+            <xpath expr="//form/sheet//group[1]" position="inside">
+
+                <!-- Públicos objetivo -->
+                <group>
+                    <field name="audience_category_ids"
+                           widget="many2many_tags"
+                           string="Públicos objetivo"
+                           placeholder="Selecciona públicos objetivo"
+                           help="Elige uno o varios grupos de contactos (Ej.: Empleados, Clientes, Estudiantes)."/>
+                </group>
+
+                <!-- Evaluación / Calificación -->
+                <group string="Evaluación">
+                    <field name="is_gradable"
+                           string="Calificable"
+                           help="Activa el modo calificable. Se calculará un puntaje final con base en las respuestas y el peso de cada pregunta."/>
+                    <!-- En Odoo 18 NO usar attrs/states; usar modifiers nativos -->
+                    <field name="min_score"
+                           string="Puntaje mínimo"
+                           placeholder="Ej: 70"
+                           required="is_gradable"
+                           invisible="not is_gradable"
+                           help="Puntaje mínimo en porcentaje (0–100) para aprobar la encuesta. Solo aplica si la encuesta es calificable."/>
+                </group>
+
+                <!-- Fecha límite de respuesta -->
+                <group>
+                    <field name="response_deadline"
+                           string="Fecha límite de respuesta"
+                           help="Indica hasta qué fecha y hora se aceptan respuestas a esta encuesta."/>
+                </group>
+
+            </xpath>
+        </field>
+    </record>
+
+    <!-- LIST de encuestas -->
+    <record id="survey_list_inherit_audience" model="ir.ui.view">
+        <field name="name">survey.survey.list.inherit.audience</field>
+        <field name="model">survey.survey</field>
+        <field name="inherit_id" ref="survey.survey_survey_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list/field[@name='title']" position="after">
+                <field name="is_gradable"/>
+                <field name="min_score"/>
+                <field name="audience_category_ids"/>
+                <field name="response_deadline"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

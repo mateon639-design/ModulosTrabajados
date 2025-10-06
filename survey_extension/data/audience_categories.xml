@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+
+    <!-- Raíz de Públicos objetivo -->
+    <record id="category_public_target_root" model="res.partner.category">
+        <field name="name">Públicos objetivo</field>
+    </record>
+
+    <!-- Hijas de ejemplo -->
+    <record id="category_public_employees" model="res.partner.category">
+        <field name="name">Empleados</field>
+        <field name="parent_id" ref="category_public_target_root"/>
+    </record>
+
+    <record id="category_public_clients" model="res.partner.category">
+        <field name="name">Clientes</field>
+        <field name="parent_id" ref="category_public_target_root"/>
+    </record>
+
+    <record id="category_public_students" model="res.partner.category">
+        <field name="name">Estudiantes</field>
+        <field name="parent_id" ref="category_public_target_root"/>
+    </record>
+
+</odoo>

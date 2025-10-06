@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- =========================
+       1) BLOQUEO VISUAL SI VENCIDA (FORM EN PROGRESO)
+       Oculta el formulario y muestra un mensaje claro.
+       ========================= -->
+  <template id="survey_deadline_in_progress_banner"
+            inherit_id="survey.survey_fill_form_in_progress"
+            name="Survey In-Progress Deadline Banner">
+    <!-- Mensaje arriba si está vencida -->
+    <xpath expr="//div[contains(@class,'o_survey_form')]" position="before">
+      <t t-if="survey and survey.deadline_passed">
+        <div class="alert alert-danger my-3" role="alert">
+          <strong>
+            <t t-esc="_('La fecha límite de esta encuesta ya ha pasado, no es posible enviar respuestas.')"/>
+          </strong>
+        </div>
+      </t>
+    </xpath>
+
+    <!-- Ocultar el formulario si está vencida -->
+    <xpath expr="//div[contains(@class,'o_survey_form')]" position="attributes">
+      <attribute name="t-attf-class">
+        <t t-if="survey and survey.deadline_passed">o_survey_form d-none</t>
+        <t t-else="">o_survey_form</t>
+      </attribute>
+    </xpath>
+  </template>
+</odoo>

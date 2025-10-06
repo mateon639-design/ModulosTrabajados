@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Mostrar contador en la LISTA de encuestas -->
+    <record id="survey_list_inherit_key_count" model="ir.ui.view">
+        <field name="name">survey.survey.list.inherit.key.count</field>
+        <field name="model">survey.survey</field>
+        <field name="inherit_id" ref="survey.survey_survey_view_tree"/>
+        <field name="arch" type="xml">
+            <!-- Insertar después del título -->
+            <xpath expr="//list/field[@name='title']" position="after">
+                <field name="key_question_count"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- (Opcional) Mostrar contador en la FORM de encuestas -->
+    <record id="survey_form_inherit_key_count" model="ir.ui.view">
+        <field name="name">survey.survey.form.inherit.key.count</field>
+        <field name="model">survey.survey</field>
+        <field name="inherit_id" ref="survey.survey_survey_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Añadirlo al primer group del sheet; solo lectura -->
+            <xpath expr="//form/sheet//group[1]" position="inside">
+                <field name="key_question_count" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
