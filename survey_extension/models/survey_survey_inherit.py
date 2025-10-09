@@ -67,6 +67,14 @@ class SurveySurvey(models.Model):
     def default_get(self, fields_list):
         return super().default_get(fields_list)
 
+    def action_generate_summary_report(self):
+        """Genera un PDF resumido de la encuesta con métricas y preguntas clave."""
+        self.ensure_one()
+        action = self.env.ref("survey_extension.action_report_survey_summary", raise_if_not_found=False)
+        if not action:
+            raise ValidationError(_("No se encontró la acción de reporte configurada para esta encuesta."))
+        return action.report_action(self)
+
     # =========================
     # Helpers público objetivo
     # =========================

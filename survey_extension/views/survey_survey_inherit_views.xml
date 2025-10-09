@@ -14,42 +14,61 @@
                         string="Asignar al público objetivo"
                         type="object"
                         class="oe_highlight"
-                        invisible="not audience_category_ids"
+                        invisible="audience_category_ids == []"
                         help="Crea participaciones (sin enviar correo) para el público objetivo seleccionado."/>
+        <button name="%(survey_extension.action_generate_summary_report_server)d"
+            string="Generar reporte"
+            type="action"
+            class="btn-secondary"
+            invisible="id == False"
+            help="Descarga un PDF con los indicadores principales de esta encuesta."/>
             </xpath>
 
-            <xpath expr="//form/sheet//group[1]" position="inside">
+            <xpath expr="//form/sheet/notebook" position="inside">
+                <page name="survey_extension_settings" string="Configuración avanzada">
+                    <group>
+                        <group>
+                            <field name="audience_category_ids"
+                                   widget="many2many_tags"
+                                   string="Público objetivo"
+                                   placeholder="Selecciona etiquetas"
+                                   help="Elige uno o varios grupos de contactos (Ej.: Empleados, Clientes, Estudiantes)."/>
+                            <field name="response_deadline"
+                                   string="Fecha límite"
+                                   help="Indica hasta qué fecha y hora se aceptan respuestas a esta encuesta."/>
+                        </group>
+                        <group string="Evaluación">
+                            <field name="is_gradable"
+                                   string="Encuesta calificable"
+                                   help="Activa el modo calificable. Se calculará un puntaje final con base en las respuestas y el peso de cada pregunta."/>
+                            <field name="min_score"
+                                   string="Puntaje mínimo (%)"
+                                   placeholder="Ej: 70"
+                                   required="is_gradable"
+                                   invisible="is_gradable == False"
+                                   help="Porcentaje mínimo para aprobar la encuesta cuando es calificable."/>
+                        </group>
+                    </group>
+                </page>
 
-                <!-- Públicos objetivo -->
-                <group>
-                    <field name="audience_category_ids"
-                           widget="many2many_tags"
-                           string="Públicos objetivo"
-                           placeholder="Selecciona públicos objetivo"
-                           help="Elige uno o varios grupos de contactos (Ej.: Empleados, Clientes, Estudiantes)."/>
-                </group>
-
-                <!-- Evaluación / Calificación -->
-                <group string="Evaluación">
-                    <field name="is_gradable"
-                           string="Calificable"
-                           help="Activa el modo calificable. Se calculará un puntaje final con base en las respuestas y el peso de cada pregunta."/>
-                    <!-- En Odoo 18 NO usar attrs/states; usar modifiers nativos -->
-                    <field name="min_score"
-                           string="Puntaje mínimo"
-                           placeholder="Ej: 70"
-                           required="is_gradable"
-                           invisible="not is_gradable"
-                           help="Puntaje mínimo en porcentaje (0–100) para aprobar la encuesta. Solo aplica si la encuesta es calificable."/>
-                </group>
-
-                <!-- Fecha límite de respuesta -->
-                <group>
-                    <field name="response_deadline"
-                           string="Fecha límite de respuesta"
-                           help="Indica hasta qué fecha y hora se aceptan respuestas a esta encuesta."/>
-                </group>
-
+                <page name="survey_extension_results" string="Resultados">
+                    <group>
+                        <group>
+                            <field name="invited_count" readonly="1"/>
+                            <field name="responses_count" readonly="1"/>
+                            <field name="participation_rate" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="average_score" readonly="1" invisible="is_gradable == False"/>
+                            <field name="evaluation_state" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="user_input_ids"
+                           domain="[('state', '=', 'done'), ('test_entry', '=', False)]"
+                           context="{'default_survey_id': id}"
+                           readonly="1"
+                           views="[(ref('survey_extension.survey_user_input_tree_results'), 'list'), (ref('survey.survey_user_input_view_form'), 'form')]"/>
+                </page>
             </xpath>
         </field>
     </record>
@@ -60,11 +79,17 @@
         <field name="model">survey.survey</field>
         <field name="inherit_id" ref="survey.survey_survey_view_tree"/>
         <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="decoration-success">evaluation_state == 'passed'</attribute>
+                <attribute name="decoration-danger">evaluation_state == 'failed'</attribute>
+                <attribute name="decoration-warning">evaluation_state == 'in_progress'</attribute>
+            </xpath>
             <xpath expr="//list/field[@name='title']" position="after">
                 <field name="is_gradable"/>
                 <field name="min_score"/>
                 <field name="audience_category_ids"/>
                 <field name="response_deadline"/>
+                <field name="evaluation_state"/>
             </xpath>
         </field>
     </record>

@@ -7,12 +7,20 @@
     <field name="model">survey.survey</field>
     <field name="inherit_id" ref="survey.survey_survey_view_form"/>
     <field name="arch" type="xml">
-      <!-- Insertamos al final del sheet para evitar choques con otros módulos -->
-      <xpath expr="//form/sheet" position="inside">
-        <group string="Métricas">
+      <xpath expr="//form/sheet/notebook/page[@name='survey_extension_results']/group" position="attributes">
+        <attribute name="col">2</attribute>
+      </xpath>
+      <xpath expr="//form/sheet/notebook/page[@name='survey_extension_results']/group/group[1]" position="replace">
+        <group string="Participación" col="2">
+          <field name="invited_count" readonly="1"/>
+          <field name="responses_count" readonly="1"/>
           <field name="participation_rate" readonly="1"/>
-          <!-- Solo tiene sentido si es calificable -->
-          <field name="average_score" readonly="1" invisible="not is_gradable"/>
+        </group>
+      </xpath>
+      <xpath expr="//form/sheet/notebook/page[@name='survey_extension_results']/group/group[2]" position="replace">
+        <group string="Calificación" col="2">
+          <field name="average_score" readonly="1" invisible="is_gradable == False"/>
+          <field name="evaluation_state" readonly="1"/>
         </group>
       </xpath>
     </field>

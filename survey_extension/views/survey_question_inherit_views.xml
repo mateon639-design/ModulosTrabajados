@@ -7,20 +7,23 @@
         <field name="model">survey.question</field>
         <field name="inherit_id" ref="survey.survey_question_form"/>
         <field name="arch" type="xml">
-            <!-- Pestaña 'Opciones' (name estable), añadimos un nuevo grupo al final -->
-            <xpath expr="//form//notebook/page[@name='options']" position="inside">
-                <group string="Evaluación">
-                    <field name="weight"
-                           string="Peso de la pregunta"
-                           widget="float"
-                           placeholder="Ej.: 1.0"
-                           help="Importancia relativa. 2.0 equivale al doble que 1.0."/>
-                    <field name="category_id"
-                           string="Categoría"
-                           help="Clasifica la pregunta (p. ej.: Técnica, Actitudinal, General)."/>
-                    <field name="is_key"
-                           string="¿Es pregunta clave?"
-                           help="Marca si esta pregunta es clave dentro de la encuesta."/>
+            <xpath expr="//form/sheet/div[@class='oe_title']" position="after">
+                <group col="2" invisible="is_page == True" string="Configuración de la pregunta">
+                    <group>
+                        <field name="weight"
+                               string="Peso"
+                               widget="float"
+                               placeholder="Ej.: 1.0"
+                               help="Importancia relativa de la pregunta en el cálculo de la nota."/>
+                        <field name="category_id"
+                               string="Categoría"
+                               help="Clasifica la pregunta (p. ej.: Técnica, Actitudinal, General)."/>
+                    </group>
+                    <group>
+                        <field name="is_key"
+                               string="Pregunta clave"
+                               help="Marca si esta pregunta es clave dentro de la encuesta."/>
+                    </group>
                 </group>
             </xpath>
         </field>

@@ -3,9 +3,32 @@ from odoo import api, fields, models, _
 from math import isclose
 
 # Compatibilidad con distintos nombres que pueda tener tu base
-CALIFICABLE_CANDIDATES = ("calificable", "is_quiz", "is_scored", "gradable", "grade_enabled")
-MIN_SCORE_CANDIDATES   = ("puntaje_minimo", "min_score", "minimum_score", "passing_score", "pass_score", "score_min")
-WEIGHT_CANDIDATES      = ("peso", "weight", "points", "puntaje", "score_weight")
+CALIFICABLE_CANDIDATES = (
+    "calificable",
+    "is_quiz",
+    "is_scored",
+    "gradable",
+    "grade_enabled",
+    "is_gradable",
+    "x_is_gradable",
+)
+MIN_SCORE_CANDIDATES = (
+    "puntaje_minimo",
+    "min_score",
+    "minimum_score",
+    "passing_score",
+    "pass_score",
+    "score_min",
+    "x_min_score",
+)
+WEIGHT_CANDIDATES = (
+    "peso",
+    "weight",
+    "points",
+    "puntaje",
+    "score_weight",
+    "x_weight",
+)
 
 
 class SurveyUserInput(models.Model):

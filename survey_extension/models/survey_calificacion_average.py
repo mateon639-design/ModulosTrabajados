@@ -19,11 +19,34 @@ class SurveySurvey(models.Model):
         help="Promedio de nota (en %) de las participaciones entregadas. "
              "Se calcula solo si la encuesta es calificable.",
     )
+    invited_count = fields.Integer(
+        string="Participantes invitados",
+        compute="_compute_survey_metrics",
+        compute_sudo=True,
+        help="Cantidad de participaciones (survey.user_input) vinculadas a esta encuesta.",
+    )
+    responses_count = fields.Integer(
+        string="Respuestas recibidas",
+        compute="_compute_survey_metrics",
+        compute_sudo=True,
+        help="Participaciones enviadas (estado 'done', sin tests).",
+    )
+    evaluation_state = fields.Selection(
+        selection=[
+            ("in_progress", "En curso"),
+            ("passed", "Aprobada"),
+            ("failed", "No aprobada"),
+        ],
+        string="Estado de evaluación",
+        compute="_compute_survey_metrics",
+        compute_sudo=True,
+        help="Permite resaltar rápidamente si la encuesta alcanzó el mínimo requerido.",
+    )
 
     # ---------------------------------------------------------------------
     # Cómputo de métricas
     # ---------------------------------------------------------------------
-    @api.depends('user_input_ids.state', 'is_gradable')
+    @api.depends('user_input_ids.state', 'user_input_ids.test_entry', 'is_gradable', 'min_score')
     def _compute_survey_metrics(self):
         UI = self.env['survey.user_input'].sudo()
 
@@ -81,3 +104,19 @@ class SurveySurvey(models.Model):
 
             survey.participation_rate = rate
             survey.average_score = avg
+            survey.invited_count = total_invited
+            survey.responses_count = total_done
+
+            state = "in_progress"
+            if survey.is_gradable and total_done:
+                threshold = survey.min_score or 0.0
+                if avg >= threshold:
+                    state = "passed"
+                else:
+                    state = "failed"
+            elif not survey.is_gradable:
+                if total_invited and total_done >= total_invited:
+                    state = "passed"
+                elif total_done:
+                    state = "in_progress"
+            survey.evaluation_state = state

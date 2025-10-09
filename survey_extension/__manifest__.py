@@ -12,6 +12,7 @@
         "data/audience_categories.xml",
         "data/question_categories.xml",
         "views/survey_user_input_inherit_views.xml",
+        "views/report_survey_summary.xml",
         "views/survey_survey_inherit_views.xml",
         "views/survey_question_inherit_views.xml",
         "views/survey_key_counter_views.xml",
