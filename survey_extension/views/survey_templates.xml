@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+ARCHIVO: survey_templates.xml
+PROPÓSITO: Ajustes visuales del formulario público de encuestas.
+- Banner de fecha límite vencida.
+- Ocultar formulario si venció (sin pisar clases existentes).
+- Atributos data-* para preguntas condicionales (consumidos por JS).
+-->
 <odoo>
 
-  <!-- =========================
-       1) BLOQUEO VISUAL SI VENCIDA (FORM EN PROGRESO)
-       Oculta el formulario y muestra un mensaje claro.
-       ========================= -->
+  <!-- Banner y ocultar formulario cuando la encuesta está vencida -->
   <template id="survey_deadline_in_progress_banner"
             inherit_id="survey.survey_fill_form_in_progress"
             name="Survey In-Progress Deadline Banner">
-    <!-- Mensaje arriba si está vencida -->
+
+    <!-- Alerta antes del formulario si venció -->
     <xpath expr="//div[contains(@class,'o_survey_form')]" position="before">
       <t t-if="survey and survey.deadline_passed">
         <div class="alert alert-danger my-3" role="alert">
@@ -19,12 +24,41 @@
       </t>
     </xpath>
 
-    <!-- Ocultar el formulario si está vencida -->
+    <!-- Añadir la clase d-none sin sobrescribir las clases existentes -->
     <xpath expr="//div[contains(@class,'o_survey_form')]" position="attributes">
-      <attribute name="t-attf-class">
-        <t t-if="survey and survey.deadline_passed">o_survey_form d-none</t>
-        <t t-else="">o_survey_form</t>
-      </attribute>
+      <!-- t-att-class se CONCATENA a la clase estática, no la reemplaza -->
+      <attribute name="t-att-class">(survey and survey.deadline_passed) and 'd-none' or None</attribute>
     </xpath>
   </template>
+
+  <!-- Atributos data-* en el contenedor de cada pregunta (para lógica JS) -->
+  <template id="survey_conditional_questions_attributes"
+            inherit_id="survey.question_container"
+            name="Conditional Questions Data Attributes">
+
+    <!-- Aplica sobre el div principal de la pregunta -->
+    <xpath expr="//div[@t-att-id='question.id']" position="attributes">
+      <attribute name="t-att-data-conditional">question.is_conditional</attribute>
+      <attribute name="t-att-data-question-id">question.id</attribute>
+      <attribute name="t-att-data-conditional-question-id">
+        question.is_conditional and question.conditional_question_id and question.conditional_question_id.id or False
+      </attribute>
+      <attribute name="t-att-data-conditional-answer-id">
+        question.is_conditional and question.conditional_answer_id and question.conditional_answer_id.id or False
+      </attribute>
+      <attribute name="t-att-data-originally-required">question.constr_mandatory</attribute>
+    </xpath>
+  </template>
+
+  <!-- Atributo data-answer-id en cada opción (radio) -->
+  <template id="survey_conditional_answer_attributes"
+            inherit_id="survey.question_simple_choice"
+            name="Conditional Answer Data Attributes">
+
+    <!-- Agregamos el data-answer-id a cada input radio -->
+    <xpath expr="//input[@type='radio']" position="attributes">
+      <attribute name="t-att-data-answer-id">label and label.id or False</attribute>
+    </xpath>
+  </template>
+
 </odoo>

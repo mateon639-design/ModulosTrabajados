@@ -1,39 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+ARCHIVO: survey_user_input_inherit_views.xml
+PROPÓSITO: Mostrar resultados de calificación en participaciones (Odoo 18 compatible).
+-->
 <odoo>
 
-    <!-- Participación (user_input): añadir bloque de puntuación -->
-    <record id="survey_user_input_form_inherit_scores" model="ir.ui.view">
-        <field name="name">survey.user_input.form.inherit.scores</field>
-        <field name="model">survey.user_input</field>
-        <field name="inherit_id" ref="survey.survey_user_input_view_form"/>
-        <field name="arch" type="xml">
-            <!-- Insertamos al final del primer group del sheet -->
-            <xpath expr="//form/sheet//group[1]" position="after">
-                <field name="is_gradable_rel" invisible="1"/>
-                
-                <group string="Resultados (calculados)" invisible="is_gradable_rel == False">
-                    <field name="score_points" readonly="1"/>
-                    <field name="score_total" readonly="1"/>
-                    <field name="score_percentage" readonly="1"/>
-                    <field name="is_passed" readonly="1"/>
-                </group>
-            </xpath>
-        </field>
-    </record>
+  <!-- FORM: bloque de resultados calculados (visible solo si la encuesta es calificable) -->
+  <record id="survey_user_input_form_inherit_scores" model="ir.ui.view">
+    <field name="name">survey.user_input.form.inherit.scores</field>
+    <field name="model">survey.user_input</field>
+    <field name="inherit_id" ref="survey.survey_user_input_view_form"/>
+    <field name="arch" type="xml">
+      <!-- Insertar después del primer group dentro del sheet -->
+      <xpath expr="//form/sheet//group[1]" position="after">
 
-    <!-- Tree view para resultados rápidos desde la encuesta -->
-    <record id="survey_user_input_tree_results" model="ir.ui.view">
-        <field name="name">survey.user_input.tree.results</field>
-        <field name="model">survey.user_input</field>
-        <field name="arch" type="xml">
-            <list string="Participaciones" create="false" edit="false">
-                <field name="partner_id" optional="show"/>
-                <field name="email" optional="show"/>
-                <field name="state"/>
-                <field name="end_datetime" optional="hide"/>
-                <field name="score_percentage" optional="show"/>
-            </list>
-        </field>
-    </record>
+        <!-- Campo auxiliar: related a survey_id.is_gradable (oculto) -->
+        <field name="is_gradable_rel" column_invisible="1"/>
+
+        <!-- Grupo de resultados (usa invisible, no 'attrs') -->
+        <group string="Resultados (calculados)" invisible="is_gradable_rel == False">
+          <field name="score_points" readonly="1"/>
+          <field name="score_total" readonly="1"/>
+          <field name="score_percentage" readonly="1"/>
+          <field name="is_passed" readonly="1"/>
+        </group>
+
+      </xpath>
+    </field>
+  </record>
+
+  <!-- LIST: vista compacta para la pestaña Resultados en survey.survey -->
+  <record id="survey_user_input_tree_results" model="ir.ui.view">
+    <field name="name">survey.user_input.tree.results</field>
+    <field name="model">survey.user_input</field>
+    <field name="arch" type="xml">
+      <list string="Participaciones" create="false" edit="false">
+        <field name="partner_id" optional="show"/>
+        <field name="email" optional="show"/>
+        <field name="state"/>
+        <field name="end_datetime" optional="hide"/>
+        <field name="score_percentage" optional="show"/>
+      </list>
+    </field>
+  </record>
 
 </odoo>
