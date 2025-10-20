@@ -10,7 +10,8 @@ Este archivo extiende las preguntas de Odoo con nuevas características:
 4. Visibilidad condicional (mostrar preguntas solo si se cumple una condición)
 """
 
-from odoo import fields, models, api
+from odoo import _, fields, models, api
+from odoo.osv import expression
 
 
 # ============================================================================
@@ -160,6 +161,12 @@ class SurveyQuestion(models.Model):
         #          seleccionaríamos la respuesta "No"
     )
     
+    attachment_count = fields.Integer(
+        string="Cantidad de archivos",
+        compute="_compute_attachment_count",
+        help="Número de archivos vinculados directamente a la pregunta.",
+    )
+
     # ========================================================================
     # MÉTODOS (FUNCIONES)
     # ========================================================================
@@ -186,5 +193,45 @@ class SurveyQuestion(models.Model):
             # Limpiar los campos condicionales
             self.conditional_question_id = False
             self.conditional_answer_id = False
+
+    def _compute_attachment_count(self):
+        Attachment = self.env['ir.attachment'].sudo()
+        if not self.ids:
+            for question in self:
+                question.attachment_count = 0
+            return
+        grouped = Attachment.read_group(
+            [('res_model', '=', 'survey.question'), ('res_id', 'in', self.ids)],
+            ['res_id'],
+            ['res_id'],
+        )
+        count_map = {item['res_id']: item['res_id_count'] for item in grouped}
+        for question in self:
+            question.attachment_count = count_map.get(question.id, 0)
+
+    def action_open_question_attachments(self):
+        self.ensure_one()
+        action = self.env.ref('base.action_attachment', raise_if_not_found=False)
+        base_context = {
+            'default_res_model': 'survey.question',
+            'default_res_id': self.id,
+        }
+        domain = [('res_model', '=', 'survey.question'), ('res_id', '=', self.id)]
+        if action:
+            result = action.read()[0]
+            result['domain'] = (
+                expression.AND([result['domain'], domain]) if result.get('domain') else domain
+            )
+            result['context'] = {**result.get('context', {}), **base_context}
+            return result
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Archivos adjuntos'),
+            'res_model': 'ir.attachment',
+            'view_mode': 'list,form',
+            'domain': domain,
+            'context': base_context,
+        }
 
 

@@ -26,6 +26,11 @@ PROPÓSITO: Mostrar resultados de calificación en participaciones (Odoo 18 comp
         </group>
 
       </xpath>
+      <xpath expr="//form/sheet/notebook" position="inside">
+        <page name="survey_extension_attachments" string="Adjuntos">
+          <field name="attachment_link_ids" context="{'default_user_input_id': id}"/>
+        </page>
+      </xpath>
     </field>
   </record>
 

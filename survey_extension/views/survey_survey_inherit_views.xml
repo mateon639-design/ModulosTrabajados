@@ -59,9 +59,11 @@ NOTAS:
               <field name="response_deadline"
                      string="Fecha límite"
                      help="Último momento para aceptar respuestas."/>
-    <field name="version_date"
-      string="Fecha de versión"
+    <field name="version_year"
+      string="Año de versión"
+      placeholder="2025"
       help="Identifica la vigencia de esta versión de la encuesta."/>
+    <field name="version_date" invisible="1"/>
             </group>
             <group string="Evaluación">
               <field name="is_gradable"
@@ -127,7 +129,8 @@ NOTAS:
         <field name="is_gradable"/>
         <field name="min_score"/>
         <field name="audience_category_ids" widget="many2many_tags"/>
-        <field name="response_deadline"/>
+  <field name="response_deadline"/>
+  <field name="version_year" optional="show"/>
         <field name="evaluation_state"/>
       </xpath>
 

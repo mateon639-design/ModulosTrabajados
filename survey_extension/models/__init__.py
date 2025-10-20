@@ -13,3 +13,5 @@ from . import survey_deadline
 from . import survey_scoring
 from . import survey_gradable
 from . import survey_calificacion_average
+from . import survey_trash
+from . import survey_user_input_attachment

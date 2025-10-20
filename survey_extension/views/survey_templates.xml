@@ -17,9 +17,7 @@ PROPÓSITO: Ajustes visuales del formulario público de encuestas.
     <xpath expr="//div[contains(@class,'o_survey_form')]" position="before">
       <t t-if="survey and survey.deadline_passed">
         <div class="alert alert-danger my-3" role="alert">
-          <strong>
-            <t t-esc="_('La fecha límite de esta encuesta ya ha pasado, no es posible enviar respuestas.')"/>
-          </strong>
+          <strong>La fecha límite de esta encuesta ya ha pasado, no es posible enviar respuestas.</strong>
         </div>
       </t>
     </xpath>
@@ -58,6 +56,57 @@ PROPÓSITO: Ajustes visuales del formulario público de encuestas.
     <!-- Agregamos el data-answer-id a cada input radio -->
     <xpath expr="//input[@type='radio']" position="attributes">
       <attribute name="t-att-data-answer-id">label and label.id or False</attribute>
+    </xpath>
+  </template>
+
+  <!-- Contenedor para adjuntar archivos a cada pregunta -->
+  <template id="survey_question_attachment_area"
+            inherit_id="survey.question_container"
+            name="Survey Question Attachment Area">
+    <xpath expr="//div[@t-att-id='question.id']" position="inside">
+      <t t-if="not question.is_page">
+        <t t-set="question_attachments" t-value="answer.get_question_attachments(question) if answer else request.env['survey.user_input.attachment']"/>
+        <div class="o_survey_attachment_area mt-3"
+             t-att-data-question-id="question.id"
+             t-att-data-survey-token="survey.access_token"
+             t-att-data-answer-token="answer.access_token"
+             t-att-data-readonly="survey_form_readonly">
+          <div class="o_survey_attachment_list d-flex flex-column gap-2"
+               t-if="question_attachments">
+            <t t-foreach="question_attachments" t-as="qa">
+              <div class="o_survey_attachment_item d-flex align-items-center gap-2"
+                   t-att-data-link-id="qa.id"
+                   t-att-data-attachment-id="qa.attachment_id.id">
+                <a class="o_survey_attachment_link"
+                   t-att-href="'/web/content/%s?download=1' % qa.attachment_id.id"
+                   target="_blank" rel="noopener">
+                  <i class="fa fa-paperclip me-1"/>
+                  <t t-esc="qa.attachment_id.name"/>
+                </a>
+                <span class="text-muted small" t-if="qa.mimetype">
+                  <t t-esc="qa.mimetype"/>
+                </span>
+                <button t-if="not survey_form_readonly"
+                        type="button"
+                        class="btn btn-sm btn-link text-danger o_survey_attachment_remove"
+                        t-att-data-link-id="qa.id">
+                  <i class="fa fa-times"/>
+                </button>
+              </div>
+            </t>
+          </div>
+          <div class="o_survey_attachment_empty text-muted" t-if="not question_attachments">
+            <span>Sin archivos adjuntos para esta pregunta.</span>
+          </div>
+          <div t-if="not survey_form_readonly" class="o_survey_attachment_actions mt-2">
+            <input type="file" class="d-none o_survey_attachment_input"/>
+            <button type="button" class="btn btn-outline-secondary btn-sm o_survey_attachment_add">
+              <i class="fa fa-paperclip me-1"/>
+              Adjuntar archivo
+            </button>
+          </div>
+        </div>
+      </t>
     </xpath>
   </template>
 

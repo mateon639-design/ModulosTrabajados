@@ -57,15 +57,60 @@ class SurveySurvey(models.Model):
             return
 
         used_numbers = self._used_id_numbers(exclude_records=records)
+        available_pool = self.env["survey.code.available"].sudo()
+
+        selection_queue = []
+        ctx = self.env.context or {}
+        if ctx.get("preselected_code_numbers"):
+            numbers = ctx.get("preselected_code_numbers") or []
+            values = ctx.get("preselected_code_values") or []
+            pool_ids = ctx.get("preselected_code_ids") or []
+            for idx, number in enumerate(numbers):
+                selection_queue.append(
+                    {
+                        "number": number,
+                        "value": values[idx] if idx < len(values) else False,
+                        "pool_id": pool_ids[idx] if idx < len(pool_ids) else False,
+                    }
+                )
+        elif ctx.get("preselected_code_number"):
+            selection_queue.append(
+                {
+                    "number": ctx.get("preselected_code_number"),
+                    "value": ctx.get("preselected_code_value"),
+                    "pool_id": ctx.get("preselected_code_id"),
+                }
+            )
+
         for record in records:
+            selection = selection_queue.pop(0) if selection_queue else None
+            if selection and selection.get("number"):
+                number = selection.get("number")
+                record.code = selection.get("value") or self._format_code(number)
+                used_numbers.add(number)
+                pool_id = selection.get("pool_id")
+                if pool_id:
+                    available_pool.browse(pool_id).unlink()
+                else:
+                    pool_entry = available_pool.search([("number", "=", number)], limit=1)
+                    if pool_entry:
+                        pool_entry.unlink()
+                continue
+
             number = self._extract_number(record.code)
             if number and number not in used_numbers:
+                pool_entry = available_pool.search([("number", "=", number)], limit=1)
+                if pool_entry:
+                    pool_entry.unlink()
                 used_numbers.add(number)
                 continue
 
             number = self._next_available_number(used_numbers)
             record.code = self._format_code(number)
             used_numbers.add(number)
+            pool_entry = available_pool.search([("number", "=", number)], limit=1)
+            if pool_entry:
+                pool_entry.unlink()
 
     @api.model
     def _used_id_numbers(self, exclude_records=None):
@@ -90,10 +135,9 @@ class SurveySurvey(models.Model):
 
     @api.model
     def _next_available_number(self, used_numbers):
-        candidate = 1
-        while candidate in used_numbers:
-            candidate += 1
-        return candidate
+        if not used_numbers:
+            return 1
+        return max(used_numbers) + 1
 
     @api.model
     def _format_code(self, number):

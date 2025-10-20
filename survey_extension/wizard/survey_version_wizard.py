@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Asistente para generar nuevas versiones de encuestas."""
 
+from datetime import date
+
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
@@ -21,6 +23,13 @@ class SurveyVersionWizard(models.TransientModel):
         required=True,
         default=lambda self: fields.Date.context_today(self),
         help="Fecha que identifica la versión generada.",
+    )
+    version_year = fields.Char(
+        string="Año de versión",
+        required=True,
+        size=4,
+        default=lambda self: str(fields.Date.context_today(self).year),
+        help="Solo se mostrará el año seleccionado; internamente se almacena como 1 de enero del año elegido.",
     )
     new_title = fields.Char(
         string="Título de la nueva versión",
@@ -50,8 +59,10 @@ class SurveyVersionWizard(models.TransientModel):
         if survey and survey.exists():
             result.setdefault("survey_id", survey.id)
             date_today = fields.Date.context_today(self)
-            result.setdefault("version_date", date_today)
-            suggested = self._build_suggested_title_static(survey, date_today)
+            default_year = date_today.year
+            result.setdefault("version_date", date(default_year, 1, 1))
+            result.setdefault("version_year", str(default_year))
+            suggested = self._build_suggested_title_static(survey, default_year)
             if suggested:
                 result.setdefault("new_title", suggested)
             else:
@@ -72,6 +83,7 @@ class SurveyVersionWizard(models.TransientModel):
                     line_vals.append((0, 0, {
                         "question_id": question.id,
                         "include": True,
+                        "is_editing": False,
                     }))
                 
                 if line_vals:
@@ -80,24 +92,52 @@ class SurveyVersionWizard(models.TransientModel):
         return result
 
     @staticmethod
-    def _build_suggested_title_static(survey, date_value):
+    def _build_suggested_title_static(survey, year_value):
         """Genera un título sugerido con base en la fecha y el nombre de la encuesta."""
         if not survey or not survey.title:
             return False
-        if not date_value:
+        if not year_value:
             return survey.title
-        date_obj = fields.Date.to_date(date_value)
-        if not date_obj:
-            return survey.title
-        return ("%s %s" % (survey.title, date_obj.year)).strip()
+        if isinstance(year_value, (float, str)):
+            try:
+                year_value = int(year_value)
+            except (TypeError, ValueError):
+                return survey.title
+        if isinstance(year_value, fields.Date):
+            year_value = year_value.year
+        return ("%s %s" % (survey.title, year_value)).strip()
 
     def _build_suggested_title(self):
         self.ensure_one()
-        return self._build_suggested_title_static(self.survey_id, self.version_date or fields.Date.context_today(self))
+        year_value = self.version_year or str(fields.Date.context_today(self).year)
+        # Convertir a int si es string para la función estática
+        try:
+            year_int = int(year_value) if isinstance(year_value, str) else year_value
+        except (ValueError, TypeError):
+            year_int = fields.Date.context_today(self).year
+        return self._build_suggested_title_static(self.survey_id, year_int)
 
     @api.onchange("version_date")
     def _onchange_version_date(self):
         for wizard in self:
+            if wizard.version_date:
+                wizard.version_year = str(wizard.version_date.year)
+            suggested = wizard._build_suggested_title()
+            if not wizard.title_is_custom and suggested:
+                wizard.new_title = suggested
+
+    @api.onchange("version_year")
+    def _onchange_version_year(self):
+        for wizard in self:
+            if wizard.version_year:
+                try:
+                    normalized_year = int(wizard.version_year.strip())
+                except (TypeError, ValueError, AttributeError):
+                    wizard.version_date = False
+                else:
+                    wizard.version_date = date(normalized_year, 1, 1)
+            else:
+                wizard.version_date = False
             suggested = wizard._build_suggested_title()
             if not wizard.title_is_custom and suggested:
                 wizard.new_title = suggested
@@ -123,12 +163,33 @@ class SurveyVersionWizard(models.TransientModel):
         if not clean_title:
             raise ValidationError(_("Define el título de la nueva versión."))
 
+        # Convertir version_year de string a int
+        try:
+            version_year = int(self.version_year.strip()) if self.version_year else fields.Date.context_today(self).year
+        except (ValueError, AttributeError):
+            version_year = fields.Date.context_today(self).year
+            
         default_vals = {
             "title": clean_title,
-            "version_date": self.version_date,
+            "version_date": date(version_year, 1, 1),
         }
-        new_survey = survey.copy(default=default_vals)
+        # Skip code selection redirect when duplicating from the version wizard.
+        copy_ctx = dict(self.env.context or {})
+        copy_ctx.update({
+            "skip_code_selection": True,
+        })
+        new_survey = survey.with_context(copy_ctx).copy(default=default_vals)
 
+        # Construir diccionario de títulos personalizados
+        title_by_question = {}
+        for line in selected_lines:
+            # Usar título personalizado si existe y no está vacío, sino usar el original
+            custom_title = (line.new_title or "").strip()
+            original_title = (line.question_id.title or "").strip()
+            final_title = custom_title if custom_title else original_title
+            if final_title:
+                title_by_question[line.question_id.id] = final_title
+        
         allowed_ids = set(selected_lines.question_id.ids)
         original_questions = survey.question_ids.sorted(key=lambda q: (
             q.page_id.sequence if q.page_id else -1,
@@ -140,9 +201,14 @@ class SurveyVersionWizard(models.TransientModel):
             q.sequence,
             q.id,
         ))
-        for original, cloned in zip(original_questions, cloned_questions):
-            if original.id not in allowed_ids:
+        mapping = {orig.id: clone for orig, clone in zip(original_questions, cloned_questions)}
+        for original_id, cloned in mapping.items():
+            if original_id not in allowed_ids:
                 cloned.unlink()
+                continue
+            new_question_title = title_by_question.get(original_id)
+            if new_question_title:
+                cloned.write({"title": new_question_title})
 
         pages_to_check = new_survey.question_and_page_ids.filtered("is_page")
         for page in pages_to_check:
@@ -157,6 +223,23 @@ class SurveyVersionWizard(models.TransientModel):
             "view_mode": "form",
             "res_id": new_survey.id,
             "target": "current",
+        }
+
+    def action_open_current(self):
+        """Devuelve la acción para volver a cargar este asistente en la ventana modal."""
+        self.ensure_one()
+        ctx = dict(self.env.context or {})
+        ctx.setdefault("default_survey_id", self.survey_id.id if self.survey_id else False)
+        ctx.setdefault("active_id", self.survey_id.id if self.survey_id else False)
+        ctx.setdefault("active_model", "survey.survey")
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Versionar encuesta"),
+            "res_model": "survey.version.wizard",
+            "view_mode": "form",
+            "res_id": self.id,
+            "target": "new",
+            "context": ctx,
         }
 
 
@@ -180,6 +263,21 @@ class SurveyVersionWizardLine(models.TransientModel):
         string="Conservar",
         default=True,
     )
+    is_editing = fields.Boolean(
+        string="Editando",
+        default=False,
+        help="Indica si el usuario está editando el título de esta pregunta.",
+    )
+    new_title = fields.Char(
+        string="Título personalizado",
+        help="Título personalizado para esta pregunta en la nueva versión. Deja vacío para mantener el original.",
+    )
+    display_title = fields.Char(
+        string="Título en la nueva versión",
+        compute="_compute_display_title",
+        readonly=True,
+        help="Muestra el título que tendrá la pregunta (original o personalizado).",
+    )
     question_title = fields.Char(
         string="Título",
         related="question_id.title",
@@ -201,6 +299,57 @@ class SurveyVersionWizardLine(models.TransientModel):
     def _compute_page_title(self):
         for line in self:
             line.page_title = line.question_id.page_id.title if line.question_id.page_id else False
+
+    @api.depends("new_title", "question_id", "question_id.title")
+    def _compute_display_title(self):
+        """Muestra el título personalizado si existe, sino el original."""
+        for line in self:
+            if line.new_title and line.new_title.strip():
+                line.display_title = line.new_title.strip()
+            else:
+                line.display_title = line.question_id.title if line.question_id else ""
+
+    def action_open_edit_wizard(self):
+        """Abre un wizard popup para editar el título de la pregunta."""
+        self.ensure_one()
+        
+        # Crear el wizard de edición
+        edit_wizard = self.env['survey.edit.question.title.wizard'].create({
+            'line_id': self.id,
+            'page_title': self.page_title or '',
+            'question_title': self.question_title or '',
+            'new_title': self.new_title or self.question_title or '',
+        })
+        
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Editar título de pregunta',
+            'res_model': 'survey.edit.question.title.wizard',
+            'view_mode': 'form',
+            'res_id': edit_wizard.id,
+            'target': 'new',
+            'context': self.env.context,
+        }
+
+    def action_enable_edit(self):
+        """Activa el modo de edición para esta línea."""
+        self.ensure_one()
+        self.is_editing = True
+        # Pre-llenar con el título actual si está vacío
+        if not self.new_title:
+            self.new_title = self.question_id.title
+        return {
+            'type': 'ir.actions.do_nothing',
+        }
+
+    def action_cancel_edit(self):
+        """Cancela la edición y vuelve al título original."""
+        self.ensure_one()
+        self.is_editing = False
+        self.new_title = False
+        return {
+            'type': 'ir.actions.do_nothing',
+        }
 
     @api.model_create_multi
     def create(self, vals_list):

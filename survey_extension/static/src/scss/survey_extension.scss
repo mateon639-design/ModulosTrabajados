@@ -10,3 +10,17 @@
   font-size: 14px;
   padding: 6px 8px;
 }
+
+.o_survey_attachment_area {
+  border-top: 1px dashed rgba(0, 0, 0, 0.1);
+  padding-top: 0.75rem;
+}
+
+.o_survey_attachment_area .o_survey_attachment_link {
+  word-break: break-word;
+}
+
+.o_survey_attachment_area .o_survey_attachment_actions {
+  display: flex;
+  gap: 0.5rem;
+}

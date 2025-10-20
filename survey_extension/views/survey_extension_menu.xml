@@ -20,13 +20,4 @@ NOTAS:
       sequence="40"
       groups="survey.group_survey_user,survey.group_survey_manager"/>
 
-  <!-- Submenú que abre la lista/form de encuestas del core -->
-  <menuitem
-      id="survey_extension_menu_surveys"
-      name="Encuestas personalizadas"
-      parent="survey_extension_menu_root"
-      action="survey.action_survey_form"
-      sequence="10"
-      groups="survey.group_survey_user,survey.group_survey_manager"/>
-
 </odoo>

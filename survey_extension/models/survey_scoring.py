@@ -173,6 +173,29 @@ class SurveyUserInput(models.Model):
     )
 
     # ========================================================================
+    # MÉTODOS COMPUTE
+    # ========================================================================
+    
+    @api.depends('survey_id')
+    def _compute_is_gradable_rel(self):
+        """
+        Calcula si la encuesta asociada es calificable
+        
+        Este campo se usa en las vistas para mostrar/ocultar
+        la sección de resultados de calificación
+        """
+        for record in self:
+            if record.survey_id:
+                # Buscar el campo que indica si es calificable
+                record.is_gradable_rel = self._get_value(
+                    record.survey_id,
+                    CALIFICABLE_CANDIDATES,
+                    False
+                )
+            else:
+                record.is_gradable_rel = False
+
+    # ========================================================================
     # MÉTODOS AUXILIARES (HELPERS)
     # ========================================================================
     
