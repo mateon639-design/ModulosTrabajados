@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- FORM de pregunta: añade campos en la pestaña Opciones -->
+    <record id="survey_question_form_inherit_extras" model="ir.ui.view">
+        <field name="name">survey.question.form.inherit.extras</field>
+        <field name="model">survey.question</field>
+        <field name="inherit_id" ref="survey.survey_question_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/sheet/div[@class='oe_title']" position="after">
+                <group col="2" invisible="is_page == True" string="Configuración de la pregunta">
+                    <group>
+                        <field name="weight"
+                               string="Peso"
+                               widget="float"
+                               placeholder="Ej.: 1.0"
+                               help="Importancia relativa de la pregunta en el cálculo de la nota."/>
+                        <field name="category_id"
+                               string="Categoría"
+                               help="Clasifica la pregunta (p. ej.: Técnica, Actitudinal, General)."/>
+                    </group>
+                    <group>
+                        <field name="is_key"
+                               string="Pregunta clave"
+                               help="Marca si esta pregunta es clave dentro de la encuesta."/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- LIST de preguntas: muestra columnas extra -->
+    <record id="survey_question_list_inherit_extras" model="ir.ui.view">
+        <field name="name">survey.question.list.inherit.extras</field>
+        <field name="model">survey.question</field>
+        <field name="inherit_id" ref="survey.survey_question_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list/field[@name='title']" position="after">
+                <field name="weight"/>
+                <field name="category_id"/>
+                <field name="is_key"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Acción para gestionar categorías (menú opcional) -->
+    <record id="action_survey_question_category" model="ir.actions.act_window">
+        <field name="name">Categorías de preguntas</field>
+        <field name="res_model">survey.question.category</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <!-- Activa este menú si tienes un parent válido de configuración de Encuestas -->
+    <!--
+    <menuitem id="menu_survey_question_category"
+              name="Categorías de preguntas"
+              parent="survey.menu_survey_configuration"
+              action="action_survey_question_category"
+              sequence="60"/>
+    -->
+</odoo>

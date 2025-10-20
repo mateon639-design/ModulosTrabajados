@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <record id="survey_version_wizard_line_view_list" model="ir.ui.view">
+    <field name="name">survey.version.wizard.line.list</field>
+    <field name="model">survey.version.wizard.line</field>
+    <field name="arch" type="xml">
+      <list string="Preguntas disponibles" editable="bottom" create="0" delete="0">
+        <field name="wizard_id" column_invisible="1" force_save="1"/>
+        <field name="question_id" column_invisible="1" readonly="1" force_save="1"/>
+        <field name="include" widget="boolean_toggle"/>
+        <field name="question_title" readonly="1"/>
+        <field name="page_title" readonly="1" optional="show"/>
+        <field name="question_type" readonly="1" widget="badge"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="survey_version_wizard_line_view_form" model="ir.ui.view">
+    <field name="name">survey.version.wizard.line.form</field>
+    <field name="model">survey.version.wizard.line</field>
+    <field name="arch" type="xml">
+      <form string="Pregunta">
+        <group>
+          <field name="wizard_id" invisible="1"/>
+          <field name="question_id" invisible="1" readonly="1"/>
+          <field name="include"/>
+          <field name="question_title" readonly="1"/>
+          <field name="page_title" readonly="1"/>
+          <field name="question_type" readonly="1" widget="selection"/>
+        </group>
+      </form>
+    </field>
+  </record>
+
+  <record id="survey_version_wizard_view_form" model="ir.ui.view">
+    <field name="name">survey.version.wizard.form</field>
+    <field name="model">survey.version.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Versionar encuesta">
+        <sheet>
+          <group>
+            <field name="survey_id" invisible="1"/>
+            <field name="title_is_custom" invisible="1"/>
+            <field name="version_date"/>
+            <field name="new_title"/>
+          </group>
+          <separator string="Preguntas disponibles"/>
+    <field name="question_line_ids"
+     options="{'no_create': True, 'no_open': True}"
+     views="[(ref('survey_extension.survey_version_wizard_line_view_list'), 'list'),
+       (ref('survey_extension.survey_version_wizard_line_view_form'), 'form')]"/>
+        </sheet>
+        <footer>
+          <button string="Cancelar" class="btn-secondary" special="cancel"/>
+          <button name="action_confirm" string="Versionar" type="object" class="btn-primary"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+</odoo>

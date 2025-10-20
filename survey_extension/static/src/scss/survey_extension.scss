@@ -1,0 +1,12 @@
+/* Estilo para agrandar los tags del campo many2many_tags */
+.o_form_view .o_field_many2manytags .o_tag {
+  font-size: 14px;  /* tamaño del texto */
+  padding: 5px 10px;
+  margin: 2px;
+}
+
+.o_form_view .o_field_many2manytags .o_input {
+  min-height: 36px;
+  font-size: 14px;
+  padding: 6px 8px;
+}

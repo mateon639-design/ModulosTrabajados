@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_survey_question_category_user,survey.question.category user,model_survey_question_category,base.group_user,1,1,1,1
+access_survey_version_wizard,survey.version.wizard user,model_survey_version_wizard,base.group_user,1,1,1,1
+access_survey_version_wizard_line,survey.version.wizard.line user,model_survey_version_wizard_line,base.group_user,1,1,1,1
