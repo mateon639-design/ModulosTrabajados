@@ -2,10 +2,14 @@
 """Controladores adicionales para gestionar adjuntos dentro de las encuestas."""
 
 import base64
+import logging
 
 from odoo import http
 from odoo.addons.survey.controllers.main import Survey as SurveyController
 from odoo.http import request
+
+
+_logger = logging.getLogger(__name__)
 
 
 class SurveyAttachmentController(SurveyController):
@@ -35,21 +39,43 @@ class SurveyAttachmentController(SurveyController):
         csrf=True,
     )
     def upload_attachment(self, survey_token, answer_token, question_id, **kwargs):
+        _logger.debug(
+            "[survey_extension] upload_attachment called with survey_token=%s answer_token=%s question_id=%s",
+            survey_token,
+            answer_token,
+            question_id,
+        )
         survey, answer, error_response = self._can_handle_request(survey_token, answer_token)
         if error_response:
+            _logger.debug(
+                "[survey_extension] upload_attachment access denied: status=%s body=%s",
+                getattr(error_response, "status_code", None),
+                getattr(error_response, "json_body", None),
+            )
             return error_response
 
         try:
             question_id_int = int(question_id)
         except (TypeError, ValueError):
+            _logger.debug(
+                "[survey_extension] upload_attachment invalid question id: %s", question_id
+            )
             return request.make_json_response({"error": "invalid_question"}, status=400)
 
-        question = survey.question_ids.filtered(lambda q: q.id == question_id_int)
-        if not question:
+        question = request.env["survey.question"].sudo().browse(question_id_int)
+        if not question.exists() or question.survey_id.id != survey.id:
+            _logger.debug(
+                "[survey_extension] upload_attachment question mismatch: question_id=%s survey=%s",
+                question_id_int,
+                survey.id if survey else None,
+            )
             return request.make_json_response({"error": "invalid_question"}, status=404)
+        if question.question_type != "file_upload":
+            return request.make_json_response({"error": "unsupported_question"}, status=400)
 
         files = request.httprequest.files.getlist("file")
         if not files:
+            _logger.debug("[survey_extension] upload_attachment called without files")
             return request.make_json_response({"error": "missing_file"}, status=400)
 
         max_size_mb = int(
@@ -94,6 +120,12 @@ class SurveyAttachmentController(SurveyController):
                 }
             )
 
+        _logger.debug(
+            "[survey_extension] upload_attachment created %s attachments for answer %s (question %s)",
+            len(payload),
+            answer.id if answer else None,
+            question_id_int,
+        )
         return request.make_json_response({"attachments": payload})
 
     @http.route(
@@ -119,6 +151,8 @@ class SurveyAttachmentController(SurveyController):
             return {"error": "not_found"}
         if link.user_input_id.id != answer.id:
             return {"error": "forbidden"}
+        if link.question_id.question_type != "file_upload":
+            return {"error": "unsupported_question"}
 
         link.unlink()
         return {"result": True}

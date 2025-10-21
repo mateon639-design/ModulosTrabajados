@@ -94,3 +94,32 @@ class SurveyUserInput(models.Model):
         if not question:
             return self.env["survey.user_input.attachment"]
         return self.attachment_link_ids.filtered(lambda link: link.question_id == question)
+
+    def _save_lines(self, question, answer, comment=None, overwrite_existing=True):
+        if question.question_type in ("instruction", "file_upload"):
+            existing = self.user_input_line_ids.filtered(lambda line: line.question_id == question)
+            if question.question_type == "instruction":
+                if existing:
+                    existing.unlink()
+                return existing
+
+            attachment_count = question._extension_attachment_count(answer)
+            if attachment_count > 0:
+                if existing:
+                    existing.unlink()
+                return existing
+
+            if existing:
+                existing.write({"skipped": True, "answer_type": False})
+            else:
+                self.env["survey.user_input.line"].create(
+                    {
+                        "user_input_id": self.id,
+                        "question_id": question.id,
+                        "skipped": True,
+                        "answer_type": False,
+                    }
+                )
+            return existing
+
+        return super()._save_lines(question, answer, comment, overwrite_existing)

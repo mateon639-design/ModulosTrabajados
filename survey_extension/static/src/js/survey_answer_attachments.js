@@ -13,6 +13,7 @@ const ERROR_MESSAGES = {
     no_answer: _t('No se encontró una participación activa.'),
     forbidden: _t('No tienes permisos para modificar este archivo.'),
     not_found: _t('El archivo ya fue eliminado.'),
+    unsupported_question: _t('Esta pregunta no permite adjuntar archivos.'),
 };
 
 function buildAttachmentItem(data, readonly) {
@@ -54,6 +55,33 @@ function isReadonlyArea($area) {
     return false;
 }
 
+function updateAttachmentCounter($area) {
+    const $counter = $area.find('.o_survey_attachment_counter');
+    if (!$counter.length) {
+        return;
+    }
+    const $list = $area.find('.o_survey_attachment_list');
+    const count = $list.length ? $list.children('.o_survey_attachment_item').length : 0;
+    $counter.val(String(count));
+}
+
+function notify(widget, params) {
+    if (widget && typeof widget.displayNotification === 'function') {
+        widget.displayNotification(params);
+        return;
+    }
+    if (widget && typeof widget.trigger_up === 'function') {
+        try {
+            widget.trigger_up('display_notification', params);
+            return;
+        } catch (error) {
+            // Continue with fallback below when bubbling notifications fails.
+        }
+    }
+    const title = params.title ? `${params.title}: ` : '';
+    window.alert(`${title}${params.message}`);
+}
+
 SurveyFormWidget.include({
     start() {
         return this._super.apply(this, arguments).then(() => {
@@ -90,6 +118,7 @@ SurveyFormWidget.include({
             if (isReadonlyArea($area)) {
                 $area.addClass('o_survey_attachment_readonly');
             }
+            updateAttachmentCounter($area);
         });
     },
 
@@ -122,7 +151,7 @@ SurveyFormWidget.include({
         const questionId = $area.data('questionId');
         const csrfToken = this.$('input[name="csrf_token"]').val();
         if (!(surveyToken && answerToken && questionId && csrfToken)) {
-            this.displayNotification({
+            notify(this, {
                 title: _t('Error'),
                 message: _t('No fue posible preparar el envío del archivo.'),
                 type: 'danger',
@@ -144,7 +173,7 @@ SurveyFormWidget.include({
                 credentials: 'include',
             });
         } catch (error) {
-            this.displayNotification({
+            notify(this, {
                 title: _t('Error de red'),
                 message: _t('No fue posible subir el archivo. Inténtalo nuevamente.'),
                 type: 'danger',
@@ -156,7 +185,7 @@ SurveyFormWidget.include({
         try {
             payload = await response.json();
         } catch (error) {
-            this.displayNotification({
+            notify(this, {
                 title: _t('Error'),
                 message: _t('Respuesta inesperada del servidor.'),
                 type: 'danger',
@@ -174,7 +203,7 @@ SurveyFormWidget.include({
             } else {
                 message = _t('No se pudo guardar el archivo.');
             }
-            this.displayNotification({
+            notify(this, {
                 title: _t('Error'),
                 message,
                 type: 'danger',
@@ -188,7 +217,7 @@ SurveyFormWidget.include({
 
     _appendAttachment($area, attachment) {
         let $list = $area.find('.o_survey_attachment_list');
-    const readonly = isReadonlyArea($area);
+        const readonly = isReadonlyArea($area);
         if (!$list.length) {
             $list = $('<div/>', {
                 class: 'o_survey_attachment_list d-flex flex-column gap-2',
@@ -198,6 +227,7 @@ SurveyFormWidget.include({
         const $newItem = buildAttachmentItem(attachment, readonly);
         $list.append($newItem);
         $area.find('.o_survey_attachment_empty').addClass('d-none');
+        updateAttachmentCounter($area);
     },
 
     async _onAttachmentRemoveClick(event) {
@@ -220,7 +250,7 @@ SurveyFormWidget.include({
                 link_id: linkId,
             });
         } catch (error) {
-            this.displayNotification({
+            notify(this, {
                 title: _t('Error de red'),
                 message: _t('No fue posible eliminar el archivo.'),
                 type: 'danger',
@@ -231,7 +261,7 @@ SurveyFormWidget.include({
 
         $button.prop('disabled', false);
         if (result && result.error) {
-            this.displayNotification({
+            notify(this, {
                 title: _t('Error'),
                 message: ERROR_MESSAGES[result.error] || result.error,
                 type: 'danger',
@@ -247,5 +277,6 @@ SurveyFormWidget.include({
             $list.remove();
             $area.find('.o_survey_attachment_empty').removeClass('d-none');
         }
+        updateAttachmentCounter($area);
     },
 });

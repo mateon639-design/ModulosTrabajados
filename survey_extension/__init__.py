@@ -19,6 +19,7 @@ la lógica de negocio del módulo (modelos, campos, métodos, etc.)
 
 # Importar las carpetas con código Python para que Odoo cargue toda la lógica
 from . import models
+from . import controllers
 from . import wizard
 from .hooks import assign_survey_codes  # post-init: completa códigos faltantes
 

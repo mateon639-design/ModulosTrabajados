@@ -64,13 +64,22 @@ PROPÓSITO: Ajustes visuales del formulario público de encuestas.
             inherit_id="survey.question_container"
             name="Survey Question Attachment Area">
     <xpath expr="//div[@t-att-id='question.id']" position="inside">
-      <t t-if="not question.is_page">
+      <t t-if="not question.is_page and question.question_type == 'file_upload'">
         <t t-set="question_attachments" t-value="answer.get_question_attachments(question) if answer else request.env['survey.user_input.attachment']"/>
+        <t t-set="initial_count" t-value="len(question_attachments)"/>
         <div class="o_survey_attachment_area mt-3"
              t-att-data-question-id="question.id"
              t-att-data-survey-token="survey.access_token"
              t-att-data-answer-token="answer.access_token"
              t-att-data-readonly="survey_form_readonly">
+          <input type="hidden"
+                 class="o_survey_attachment_counter"
+                 data-question-type="file_upload"
+                 t-att-name="question.id"
+                 t-att-value="initial_count"/>
+          <div class="text-muted small mb-2">
+            <span t-translate="Sube uno o varios archivos como respuesta.">Sube uno o varios archivos como respuesta.</span>
+          </div>
           <div class="o_survey_attachment_list d-flex flex-column gap-2"
                t-if="question_attachments">
             <t t-foreach="question_attachments" t-as="qa">
@@ -107,6 +116,24 @@ PROPÓSITO: Ajustes visuales del formulario público de encuestas.
           </div>
         </div>
       </t>
+    </xpath>
+  </template>
+
+  <template id="survey_question_container_required"
+            inherit_id="survey.question_container"
+            name="Survey Question Required Adjustments">
+    <xpath expr="//div[contains(@t-attf-class,'js_question-wrapper')]" position="attributes">
+      <attribute name="t-att-data-required">
+        question.question_type != 'instruction' and
+        (bool(question.constr_mandatory and (not survey.users_can_go_back or survey.questions_layout == 'one_page')) or None)
+        or None
+      </attribute>
+    </xpath>
+    <xpath expr="//span[@class='text-danger']" position="attributes">
+      <attribute name="t-if">question.question_type != 'instruction' and question.constr_mandatory</attribute>
+    </xpath>
+    <xpath expr="//t[@t-set='is_skipped_question']" position="attributes">
+      <attribute name="t-value">question.question_type != 'instruction' and skipped_questions and question in skipped_questions</attribute>
     </xpath>
   </template>
 

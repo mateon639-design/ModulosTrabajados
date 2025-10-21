@@ -167,6 +167,13 @@ class SurveyQuestion(models.Model):
         help="Número de archivos vinculados directamente a la pregunta.",
     )
 
+    question_type = fields.Selection(
+        selection_add=[
+            ("file_upload", "Respuesta con archivo"),
+            ("instruction", "Solo instrucción"),
+        ]
+    )
+
     # ========================================================================
     # MÉTODOS (FUNCIONES)
     # ========================================================================
@@ -233,5 +240,73 @@ class SurveyQuestion(models.Model):
             'domain': domain,
             'context': base_context,
         }
+
+    def validate_question(self, answer, comment=None):
+        self.ensure_one()
+
+        if self.question_type == 'instruction':
+            # Preguntas informativas nunca requieren interacción.
+            return {}
+
+        if self.question_type == 'file_upload':
+            required_now = self.constr_mandatory and (
+                not self.survey_id.users_can_go_back or self.survey_id.questions_layout == 'one_page'
+            )
+
+            if not required_now:
+                return {}
+
+            attachment_count = self._extension_attachment_count(answer)
+            if attachment_count <= 0:
+                return {
+                    self.id: self.constr_error_msg
+                    or _('Adjunta al menos un archivo para continuar.')
+                }
+            return {}
+
+        return super().validate_question(answer, comment)
+
+    def _extension_attachment_count(self, answer):
+        """Normaliza el valor de respuesta para preguntas de adjuntos."""
+        self.ensure_one()
+
+        if isinstance(answer, (list, tuple)):
+            answer = answer[0] if answer else 0
+        if isinstance(answer, dict):
+            answer = answer.get('count', 0)
+        try:
+            return int(answer)
+        except (TypeError, ValueError):
+            return 0
+
+    @api.onchange('question_type')
+    def _onchange_extension_question_type(self):
+        if self.question_type == 'instruction':
+            self.constr_mandatory = False
+            self.validation_required = False
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('question_type') == 'instruction':
+                vals['constr_mandatory'] = False
+                vals['validation_required'] = False
+        return super().create(vals_list)
+
+    def write(self, vals):
+        res = super().write(vals)
+        if not self.env.context.get('survey_extension_skip_instruction_guard'):
+            instruction_questions = self.filtered(
+                lambda q: q.question_type == 'instruction'
+                and (q.constr_mandatory or q.validation_required)
+            )
+            if instruction_questions:
+                instruction_questions.with_context(
+                    survey_extension_skip_instruction_guard=True
+                ).write({
+                    'constr_mandatory': False,
+                    'validation_required': False,
+                })
+        return res
 
 
