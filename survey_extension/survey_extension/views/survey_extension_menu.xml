@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+===============================================================================
+ARCHIVO: survey_extension_menu.xml (Odoo 18)
+PROPÓSITO: Añadir al menú "Encuestas" una sección del módulo:
+           "Extensiones de encuestas" → "Encuestas personalizadas".
+NOTAS:
+- Reutiliza la acción del core: survey.action_survey_form (survey.survey).
+- Control de visibilidad por grupos (usuario/gestor de encuestas).
+- No altera acciones existentes.
+===============================================================================
+-->
+<odoo>
+
+  <!-- Contenedor dentro del menú de Encuestas -->
+  <menuitem
+      id="survey_extension_menu_root"
+      name="Extensiones de encuestas"
+      parent="survey.menu_surveys"
+      sequence="40"
+      groups="survey.group_survey_user,survey.group_survey_manager"/>
+
+</odoo>
