@@ -85,8 +85,23 @@ function notify(widget, params) {
 SurveyFormWidget.include({
     start() {
         return this._super.apply(this, arguments).then(() => {
+            // Ensure attachment UI works
             this._ensureAttachmentHandlers();
             this._initAttachmentAreas();
+            // Try to mark start on server (useful to measure abandonments). Safe to call repeatedly.
+            try {
+                const surveyToken = this.options && this.options.surveyToken;
+                const answerToken = this.options && this.options.answerToken;
+                if (surveyToken && answerToken) {
+                    // rpc helper returns a Promise
+                    rpc('/survey_extension/mark_start', { survey_token: surveyToken, answer_token: answerToken }).catch(() => {
+                        // ignore errors; marking start is best-effort
+                    });
+                }
+            } catch (err) {
+                // swallow any unexpected error to avoid breaking the widget
+                console.warn('survey_extension: mark_start failed', err);
+            }
         });
     },
 

@@ -2,8 +2,8 @@
 {
     # Información básica
     "name": "Survey Extension",
-    "summary": "Extiende Encuestas con público objetivo administrable.",
-    "version": "1.3.0",
+    "summary": "Extiende Encuestas con público objetivo, ranking, control de dispositivos y dashboards.",
+    "version": "1.4.0",
     "category": "Surveys",
     "author": "Your Company",
     "website": "https://www.example.com",
@@ -18,10 +18,13 @@
         "data/question_categories.xml",
         "data/survey_sequence.xml",
         "data/survey_trash_cron.xml",
-        "views/survey_extension_menu.xml",
-        "views/survey_user_input_inherit_views.xml",
-        "views/report_survey_summary.xml",
-        "views/survey_survey_inherit_views.xml",
+    "views/survey_extension_menu.xml",
+    "views/survey_user_input_inherit_views.xml",
+    "views/survey_survey_inherit_views.xml",
+    "views/survey_device_control_views.xml",
+    "views/survey_ranking_dashboard_views.xml",
+    "views/survey_device_templates.xml",
+    "views/report_survey_summary.xml",
         "views/survey_edit_question_title_wizard_views.xml",
         "views/survey_version_wizard_views.xml",
         "views/survey_code_selection_wizard_views.xml",
@@ -37,10 +40,14 @@
         "survey.survey_assets": [
             "survey_extension/static/src/js/survey_conditional_questions.js",
             "survey_extension/static/src/js/survey_answer_attachments.js",
+            "survey_extension/static/src/js/survey_device_capture.js",
             "survey_extension/static/src/scss/survey_extension.scss",
         ],
         "web.assets_frontend": [],
-        "web.assets_backend": [],
+        "web.assets_backend": [
+            "survey_extension/static/src/scss/survey_ranking_dashboard.scss",
+            "survey_extension/static/src/js/survey_ranking_graphs.js",
+        ],
         "web.assets_tests": [],
     },
 
@@ -51,5 +58,5 @@
 
     # Hooks
     "pre_init_hook": "migrate_version_year_to_char",
-    "post_init_hook": "assign_survey_codes",
+    "post_init_hook": "post_init_hook",
 }

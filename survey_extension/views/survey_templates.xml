@@ -48,6 +48,18 @@ PROPÓSITO: Ajustes visuales del formulario público de encuestas.
     </xpath>
   </template>
 
+  <!-- Datos de control de dispositivos en el formulario público -->
+  <template id="survey_device_form_flags"
+            inherit_id="survey.survey_fill_form"
+            name="Survey Device Control Flags">
+    <xpath expr="//form" position="attributes">
+      <attribute name="t-att-data-survey-id">survey.id</attribute>
+      <attribute name="t-att-data-restrict-device">survey.x_restrict_by_device</attribute>
+      <attribute name="t-att-data-capture-device-info">survey.x_capture_device_info</attribute>
+      <attribute name="t-att-data-allowed-device-types">survey.x_allowed_device_types</attribute>
+    </xpath>
+  </template>
+
   <!-- Atributo data-answer-id en cada opción (radio) -->
   <template id="survey_conditional_answer_attributes"
             inherit_id="survey.question_simple_choice"

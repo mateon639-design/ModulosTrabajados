@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """Rutinas de inicialización para completar códigos de encuestas existentes."""
 
+import logging
 from odoo import SUPERUSER_ID, api
+
+_logger = logging.getLogger(__name__)
 
 
 def assign_survey_codes(cr, registry):
@@ -33,3 +36,57 @@ def migrate_version_year_to_char(cr, registry):
                 ELSE version_year::varchar 
             END
         """)
+
+
+def post_init_hook(env):
+    """
+    Post-installation hook to recalculate ranking positions and assign codes.
+    """
+    _logger.info("Starting post_init_hook...")
+    
+    # Asignar códigos a encuestas existentes
+    env["survey.survey"]._assign_missing_codes()
+    
+    # Recalcular rankings
+    _recalculate_rankings(env)
+
+
+def _recalculate_rankings(env):
+    """
+    Recalculate all ranking positions for completed survey inputs.
+    """
+    try:
+        # Buscar todas las encuestas que tienen participaciones
+        surveys_with_inputs = env['survey.survey'].sudo().search([
+            ('user_input_ids', '!=', False)
+        ])
+
+        if surveys_with_inputs:
+            _logger.info(f"Recalculating rankings for {len(surveys_with_inputs)} surveys...")
+            
+            for survey in surveys_with_inputs:
+                # Buscar todas las participaciones de esta encuesta
+                all_inputs = env['survey.user_input'].sudo().search([
+                    ('survey_id', '=', survey.id)
+                ])
+                
+                if all_inputs:
+                    # Invalidar cache para forzar recálculo
+                    all_inputs.invalidate_recordset([
+                        'x_ranking_position', 
+                        'x_ranking_total',
+                        'x_ranking_percentile', 
+                        'x_ranking_medal'
+                    ])
+                    
+                    # Aplicar el ranking usando el método directo
+                    all_inputs._apply_ranking_metrics_to_survey(survey)
+                    
+                    _logger.info(f"✓ Rankings recalculated for survey '{survey.title}' ({len(all_inputs)} participations)")
+            
+            _logger.info("✅ All ranking positions recalculated successfully!")
+        else:
+            _logger.info("No surveys with participations found to recalculate.")
+            
+    except Exception as e:
+        _logger.error(f"❌ Error recalculating rankings: {e}", exc_info=True)

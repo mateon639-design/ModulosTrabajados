@@ -4,7 +4,7 @@
 import base64
 import logging
 
-from odoo import http
+from odoo import http, fields
 from odoo.addons.survey.controllers.main import Survey as SurveyController
 from odoo.http import request
 
@@ -156,3 +156,29 @@ class SurveyAttachmentController(SurveyController):
 
         link.unlink()
         return {"result": True}
+
+    @http.route(
+        "/survey_extension/mark_start",
+        type="json",
+        auth="public",
+        website=True,
+    )
+    def mark_start(self, survey_token, answer_token):
+        """Mark the answer start_datetime when the survey page is opened.
+
+        This is safe to call repeatedly; it only writes the timestamp if missing.
+        Returns a simple JSON with result and whether we wrote the timestamp.
+        """
+        survey, answer, error_response = self._can_handle_request(survey_token, answer_token, require_editable=True)
+        if error_response:
+            # _can_handle_request returns a werkzeug response for http routes; adapt for json
+            return error_response.json_body if hasattr(error_response, "json_body") else {"error": "access_denied"}
+
+        try:
+            if not answer.start_datetime:
+                answer.sudo().write({"start_datetime": fields.Datetime.now()})
+                return {"result": True, "started": True}
+            return {"result": True, "started": False}
+        except Exception:
+            _logger.exception("[survey_extension] failed to mark start for answer %s", getattr(answer, 'id', None))
+            return {"result": False, "error": "server_error"}

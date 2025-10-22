@@ -115,6 +115,7 @@
                   <th>Participante</th>
                   <th>Correo</th>
                   <th>Fecha de envío</th>
+                  <th>Duración</th>
                   <th t-if="survey.is_gradable">Nota (%)</th>
                   <th t-if="survey.is_gradable">Aprobó</th>
                 </tr>
@@ -128,6 +129,12 @@
                   <td>
                     <t t-if="response.end_datetime">
                       <t t-esc="response.end_datetime.strftime('%d/%m/%Y %H:%M')"/>
+                    </t>
+                    <t t-else="">-</t>
+                  </td>
+                  <td>
+                    <t t-if="response.x_survey_duration_display">
+                      <t t-esc="response.x_survey_duration_display"/>
                     </t>
                     <t t-else="">-</t>
                   </td>
