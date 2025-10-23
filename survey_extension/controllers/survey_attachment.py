@@ -163,22 +163,109 @@ class SurveyAttachmentController(SurveyController):
         auth="public",
         website=True,
     )
-    def mark_start(self, survey_token, answer_token):
-        """Mark the answer start_datetime when the survey page is opened.
-
-        This is safe to call repeatedly; it only writes the timestamp if missing.
-        Returns a simple JSON with result and whether we wrote the timestamp.
-        """
-        survey, answer, error_response = self._can_handle_request(survey_token, answer_token, require_editable=True)
+    def mark_start(self, survey_token, answer_token, device_uuid=None, **kwargs):
+        """Marca inicio y vincula la respuesta a un dispositivo (tablet) con información completa."""
+        survey, answer, error_response = self._can_handle_request(
+            survey_token, answer_token, require_editable=True
+        )
         if error_response:
-            # _can_handle_request returns a werkzeug response for http routes; adapt for json
             return error_response.json_body if hasattr(error_response, "json_body") else {"error": "access_denied"}
 
         try:
+            wrote = False
+            # 1) Escribir start_datetime una sola vez
             if not answer.start_datetime:
                 answer.sudo().write({"start_datetime": fields.Datetime.now()})
-                return {"result": True, "started": True}
-            return {"result": True, "started": False}
+                wrote = True
+
+            # 2) Vincular device si viene device_uuid
+            if device_uuid:
+                # buscar o crear device
+                Device = request.env["survey.device"].sudo()
+                device = Device.search([("uuid", "=", device_uuid)], limit=1)
+                
+                # Preparar información del dispositivo desde kwargs
+                device_vals = {}
+                if not device:
+                    # Obtener el siguiente número consecutivo
+                    last_device = Device.search(
+                        [('name', '=ilike', 'Dispositivo %')], 
+                        order='id desc', 
+                        limit=1
+                    )
+                    
+                    next_number = 1
+                    if last_device:
+                        # Extraer el número del último dispositivo
+                        import re
+                        match = re.search(r'Dispositivo (\d+)', last_device.name)
+                        if match:
+                            next_number = int(match.group(1)) + 1
+                    
+                    # Crear nuevo dispositivo con nombre consecutivo
+                    device_vals = {
+                        "name": f"Dispositivo {next_number}",
+                        "uuid": device_uuid,
+                        "active": True,
+                        "user_agent": kwargs.get("user_agent", ""),
+                        "platform": kwargs.get("platform", ""),
+                        "language": kwargs.get("language", ""),
+                        "timezone": kwargs.get("timezone", ""),
+                    }
+                    
+                    # Construir resoluciones
+                    screen_w = kwargs.get("screen_width", 0)
+                    screen_h = kwargs.get("screen_height", 0)
+                    if screen_w and screen_h:
+                        device_vals["screen_resolution"] = f"{screen_w}x{screen_h}"
+                    
+                    viewport_w = kwargs.get("viewport_width", 0)
+                    viewport_h = kwargs.get("viewport_height", 0)
+                    if viewport_w and viewport_h:
+                        device_vals["viewport_resolution"] = f"{viewport_w}x{viewport_h}"
+                    
+                    device = Device.create(device_vals)
+                    _logger.info("[survey_extension] Created new device: %s with UUID: %s", device.name, device_uuid)
+                else:
+                    # Actualizar información del dispositivo existente si viene nueva
+                    update_vals = {}
+                    if kwargs.get("user_agent") and not device.user_agent:
+                        update_vals["user_agent"] = kwargs.get("user_agent")
+                    if kwargs.get("platform") and not device.platform:
+                        update_vals["platform"] = kwargs.get("platform")
+                    if kwargs.get("language") and not device.language:
+                        update_vals["language"] = kwargs.get("language")
+                    if kwargs.get("timezone") and not device.timezone:
+                        update_vals["timezone"] = kwargs.get("timezone")
+                    
+                    screen_w = kwargs.get("screen_width", 0)
+                    screen_h = kwargs.get("screen_height", 0)
+                    if screen_w and screen_h and not device.screen_resolution:
+                        update_vals["screen_resolution"] = f"{screen_w}x{screen_h}"
+                    
+                    viewport_w = kwargs.get("viewport_width", 0)
+                    viewport_h = kwargs.get("viewport_height", 0)
+                    if viewport_w and viewport_h and not device.viewport_resolution:
+                        update_vals["viewport_resolution"] = f"{viewport_w}x{viewport_h}"
+                    
+                    if update_vals:
+                        device.write(update_vals)
+                
+                # escribir campos en la respuesta
+                vals = {}
+                if not answer.device_uuid:
+                    vals["device_uuid"] = device_uuid
+                if not answer.device_id:
+                    vals["device_id"] = device.id
+                if vals:
+                    answer.sudo().write(vals)
+                    wrote = True
+                    
+                # actualizar última actividad del device
+                device.update_last_response()
+
+            return {"result": True, "updated": wrote}
         except Exception:
-            _logger.exception("[survey_extension] failed to mark start for answer %s", getattr(answer, 'id', None))
+            _logger.exception("[survey_extension] failed to mark start or link device for answer %s",
+                              getattr(answer, "id", None))
             return {"result": False, "error": "server_error"}

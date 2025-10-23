@@ -34,13 +34,6 @@ PROPÓSITO: Mostrar resultados de calificación en participaciones (Odoo 18 comp
           <field name="x_passed" readonly="1" widget="boolean_toggle"/>
         </group>
 
-        <group string="Dispositivo" invisible="x_device_id == False">
-          <field name="x_device_id" readonly="1"/>
-          <field name="x_device_type" readonly="1"/>
-          <field name="x_device_participation_count" readonly="1"/>
-          <field name="x_device_info" readonly="1"/>
-        </group>
-
       </xpath>
       
       <xpath expr="//form/sheet/notebook" position="inside">

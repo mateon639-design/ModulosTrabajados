@@ -5,6 +5,7 @@ PROPÓSITO: Ajustes visuales del formulario público de encuestas.
 - Banner de fecha límite vencida.
 - Ocultar formulario si venció (sin pisar clases existentes).
 - Atributos data-* para preguntas condicionales (consumidos por JS).
+- Flags de control de dispositivo con fallback seguro (getattr).
 -->
 <odoo>
 
@@ -48,15 +49,16 @@ PROPÓSITO: Ajustes visuales del formulario público de encuestas.
     </xpath>
   </template>
 
-  <!-- Datos de control de dispositivos en el formulario público -->
+  <!-- Datos de control de dispositivos en el formulario público (con fallback seguro) -->
   <template id="survey_device_form_flags"
             inherit_id="survey.survey_fill_form"
             name="Survey Device Control Flags">
     <xpath expr="//form" position="attributes">
       <attribute name="t-att-data-survey-id">survey.id</attribute>
-      <attribute name="t-att-data-restrict-device">survey.x_restrict_by_device</attribute>
-      <attribute name="t-att-data-capture-device-info">survey.x_capture_device_info</attribute>
-      <attribute name="t-att-data-allowed-device-types">survey.x_allowed_device_types</attribute>
+      <!-- Usamos getattr para evitar AttributeError si el campo no existe aún -->
+      <attribute name="t-att-data-restrict-device">('x_restrict_by_device' in survey._fields) and survey.x_restrict_by_device or False</attribute>
+      <attribute name="t-att-data-capture-device-info">('x_capture_device_info' in survey._fields) and survey.x_capture_device_info or False</attribute>
+      <attribute name="t-att-data-allowed-device-types">('x_allowed_device_types' in survey._fields) and survey.x_allowed_device_types or ''</attribute>
     </xpath>
   </template>
 

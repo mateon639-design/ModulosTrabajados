@@ -207,11 +207,9 @@ PROPÓSITO: Vistas de ranking y dashboard para análisis de encuestas
     <field name="model">survey.user_input</field>
     <field name="priority">25</field>
     <field name="arch" type="xml">
-      <graph string="Ranking de Participantes" type="bar" stacked="False" order="desc">
+      <graph string="Ranking de Participantes" type="bar" stacked="False" order="desc" disable_linking="1" sample="1">
         <field name="partner_id" type="row"/>
         <field name="scoring_percentage" type="measure" string="Puntaje (%)" invisible="0"/>
-        <field name="x_survey_duration" type="measure" string="Duración (segundos)" invisible="1"/>
-        <field name="x_ranking_position" type="measure" string="Posición en Ranking" invisible="1"/>
       </graph>
     </field>
   </record>
@@ -222,12 +220,37 @@ PROPÓSITO: Vistas de ranking y dashboard para análisis de encuestas
     <field name="model">survey.user_input</field>
     <field name="priority">26</field>
     <field name="arch" type="xml">
-      <graph string="Distribución de Medallas" type="pie">
+      <graph string="Distribución de Medallas" type="pie" disable_linking="1" sample="1">
         <field name="x_ranking_medal" type="row"/>
-        <field name="scoring_percentage" type="measure" string="Puntaje (%)" invisible="1"/>
-        <field name="x_survey_duration" type="measure" string="Duración (segundos)" invisible="1"/>
-        <field name="x_ranking_position" type="measure" string="Posición en Ranking" invisible="1"/>
+        <field name="scoring_percentage" type="measure" string="Puntaje (%)" invisible="0"/>
       </graph>
+    </field>
+  </record>
+
+  <!-- SEARCH: Vista de búsqueda para gráficos con medidas limitadas -->
+  <record id="survey_user_input_search_ranking_graphs" model="ir.ui.view">
+    <field name="name">survey.user_input.search.ranking.graphs</field>
+    <field name="model">survey.user_input</field>
+    <field name="priority">30</field>
+    <field name="arch" type="xml">
+      <search string="Buscar Ranking">
+        <!-- Campos de búsqueda básicos -->
+        <field name="partner_id" string="Participante"/>
+        <field name="email" string="Correo"/>
+        <field name="survey_id" string="Encuesta"/>
+        
+        <!-- Filtros -->
+        <filter string="Top 10" name="filter_top_10" 
+                domain="[('x_ranking_position', '&lt;=', 10)]"/>
+        <filter string="Medallas" name="filter_medals" 
+                domain="[('x_ranking_medal', 'in', ['gold', 'silver', 'bronze'])]"/>
+        
+        <!-- Agrupaciones limitadas -->
+        <group expand="0" string="Agrupar por">
+          <filter string="Encuesta" name="group_survey" context="{'group_by': 'survey_id'}"/>
+          <filter string="Medalla" name="group_medal" context="{'group_by': 'x_ranking_medal'}"/>
+        </group>
+      </search>
     </field>
   </record>
 
@@ -238,6 +261,7 @@ PROPÓSITO: Vistas de ranking y dashboard para análisis de encuestas
     <field name="view_mode">list,kanban,graph,form</field>
     <field name="domain">[('state', '=', 'done'), ('x_ranking_position', '!=', False), ('x_ranking_position', '>', 0)]</field>
     <field name="context">{'search_default_survey_id': active_id}</field>
+    <field name="search_view_id" ref="survey_user_input_search_ranking_graphs"/>
     <field name="view_ids" eval="[(5, 0, 0),
       (0, 0, {'view_mode': 'list', 'view_id': ref('survey_user_input_tree_ranking')}),
       (0, 0, {'view_mode': 'kanban', 'view_id': ref('survey_user_input_kanban_graphs')}),
@@ -429,7 +453,6 @@ PROPÓSITO: Vistas de ranking y dashboard para análisis de encuestas
         <field name="average_score"/>
         <field name="average_duration"/>
         <field name="pass_rate"/>
-        <field name="unique_devices"/>
         <templates>
           <t t-name="kanban-box">
             <div class="oe_kanban_global_click">
@@ -478,13 +501,9 @@ PROPÓSITO: Vistas de ranking y dashboard para análisis de encuestas
                   </div>
                 </div>
                 <div class="row mt-2">
-                  <div class="col-6">
+                  <div class="col-12 text-center">
                     <span class="o_kanban_record_subtitle">Tasa de Aprobación</span>
                     <div><field name="pass_rate" widget="percentage"/></div>
-                  </div>
-                  <div class="col-6">
-                    <span class="o_kanban_record_subtitle">Dispositivos Únicos</span>
-                    <div><field name="unique_devices"/></div>
                   </div>
                 </div>
               </div>

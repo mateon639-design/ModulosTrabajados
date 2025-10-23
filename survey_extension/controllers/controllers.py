@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import http
 
-
 class SurveyExtensionController(http.Controller):
     """Punto de entrada para endpoints HTTP personalizados relacionados con encuestas."""
 

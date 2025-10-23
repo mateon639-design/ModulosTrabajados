@@ -45,10 +45,6 @@ def verify_survey_extension_installation(env):
     required_fields = [
         'x_survey_duration',
         'x_survey_duration_display',
-        'x_device_id',
-        'x_device_type',
-        'x_device_info',
-        'x_device_participation_count',
         'x_ranking_position',
         'x_ranking_total',
         'x_ranking_percentile',
@@ -64,12 +60,7 @@ def verify_survey_extension_installation(env):
     
     # 3. Verificar campos en survey.survey
     print("\n3. Verificando campos en survey.survey...")
-    survey_fields = [
-        'x_restrict_by_device',
-        'x_capture_device_info',
-        'x_allowed_device_types',
-        'x_unique_devices_count',
-    ]
+    survey_fields = []
     
     survey_model_fields = env['survey.survey'].fields_get()
     for field in survey_fields:

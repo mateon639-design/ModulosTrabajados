@@ -85,23 +85,54 @@ function notify(widget, params) {
 SurveyFormWidget.include({
     start() {
         return this._super.apply(this, arguments).then(() => {
-            // Ensure attachment UI works
+            // Asegurar UI de adjuntos
             this._ensureAttachmentHandlers();
             this._initAttachmentAreas();
-            // Try to mark start on server (useful to measure abandonments). Safe to call repeatedly.
+
+            // ===== Vincular DISPOSITIVO automáticamente =====
             try {
-                const surveyToken = this.options && this.options.surveyToken;
-                const answerToken = this.options && this.options.answerToken;
+                // 1) Generar/leer UUID persistente por navegador/dispositivo
+                let uuid = window.localStorage.getItem('survey_device_uuid');
+                if (!uuid) {
+                    uuid = 'DEV-' + Math.random().toString(36).slice(2) + '-' + Date.now();
+                    window.localStorage.setItem('survey_device_uuid', uuid);
+                }
+
+                // 2) Leer tokens desde el <form data-survey-token data-answer-token> (Odoo 18)
+                let formEl = this.el.querySelector('form[data-survey-token][data-answer-token]');
+                if (!formEl) {
+                    formEl = document.querySelector('form[data-survey-token][data-answer-token]');
+                }
+                const surveyToken = formEl ? formEl.dataset.surveyToken : null;
+                const answerToken = formEl ? formEl.dataset.answerToken : null;
+
+                // 3) Recopilar información completa del dispositivo
+                const deviceInfo = {
+                    device_uuid: uuid,
+                    user_agent: navigator.userAgent || '',
+                    screen_width: window.screen.width || 0,
+                    screen_height: window.screen.height || 0,
+                    viewport_width: window.innerWidth || 0,
+                    viewport_height: window.innerHeight || 0,
+                    platform: navigator.platform || '',
+                    language: navigator.language || '',
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+                    timestamp: new Date().toISOString(),
+                };
+
+                // 4) Llamar al endpoint con device_uuid para crear/vincular survey.device
                 if (surveyToken && answerToken) {
-                    // rpc helper returns a Promise
-                    rpc('/survey_extension/mark_start', { survey_token: surveyToken, answer_token: answerToken }).catch(() => {
-                        // ignore errors; marking start is best-effort
-                    });
+                    rpc('/survey_extension/mark_start', {
+                        survey_token: surveyToken,
+                        answer_token: answerToken,
+                        ...deviceInfo  // ← ENVIAR TODA LA INFORMACIÓN DEL DISPOSITIVO
+                    }).catch(() => { /* silencioso */ });
                 }
             } catch (err) {
-                // swallow any unexpected error to avoid breaking the widget
-                console.warn('survey_extension: mark_start failed', err);
+                // No romper la UI si algo falla
+                console.warn('survey_extension: device bind failed', err);
             }
+            // ===== Fin vínculo de dispositivo =====
         });
     },
 

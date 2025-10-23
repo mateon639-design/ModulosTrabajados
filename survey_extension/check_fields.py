@@ -52,20 +52,6 @@ def check_survey_fields(env):
         else:
             print(f"  ❌ {field} - NO EXISTE")
     
-    # Campos de dispositivo
-    device_fields = [
-        'x_device_id',
-        'x_device_type',
-        'x_device_info',
-    ]
-    
-    print("\nCampos de dispositivo disponibles:")
-    for field in device_fields:
-        if field in fields_dict:
-            print(f"  ✅ {field} - Tipo: {fields_dict[field].get('type', 'unknown')}")
-        else:
-            print(f"  ❌ {field} - NO EXISTE")
-    
     # Campos de ranking
     ranking_fields = [
         'x_ranking_position',
@@ -89,7 +75,7 @@ def check_survey_fields(env):
         SELECT column_name, data_type 
         FROM information_schema.columns 
         WHERE table_name = 'survey_user_input' 
-        AND column_name LIKE ANY(ARRAY['%score%', '%ranking%', '%device%', '%duration%'])
+        AND column_name LIKE ANY(ARRAY['%score%', '%ranking%', '%duration%'])
         ORDER BY column_name
     """)
     

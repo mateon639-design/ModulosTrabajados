@@ -16,5 +16,5 @@ from . import survey_calificacion_average
 from . import survey_trash
 from . import survey_user_input_attachment
 from . import survey_user_input_extensions
-from . import survey_device_control
 from . import survey_ranking_dashboard
+from . import survey_device

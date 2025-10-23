@@ -376,11 +376,6 @@ class SurveyDashboard(models.Model):
         digits=(5, 2),
     )
 
-    unique_devices = fields.Integer(
-        string='Dispositivos Únicos',
-        readonly=True,
-    )
-
     def _update_action_domain_context(self, action, extra_domain=None, extra_context=None, base_context=None):
         """Helper to inject domain/context without duplicating literal eval logic."""
         eval_context = base_context.copy() if base_context else {}
@@ -566,8 +561,7 @@ class SurveyDashboard(models.Model):
                             0
                         )::numeric,
                         4
-                    ) AS pass_rate,
-                    COUNT(DISTINCT sui.x_device_id) FILTER (WHERE sui.x_device_id IS NOT NULL) AS unique_devices
+                    ) AS pass_rate
                 FROM
                     survey_survey ss
                 LEFT JOIN

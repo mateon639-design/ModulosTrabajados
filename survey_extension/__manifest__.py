@@ -1,62 +1,98 @@
 # -*- coding: utf-8 -*-
 {
-    # Información básica
+    # ============================================================
+    # METADATA
+    # ============================================================
     "name": "Survey Extension",
-    "summary": "Extiende Encuestas con público objetivo, ranking, control de dispositivos y dashboards.",
+    "summary": "Extiende Encuestas con público objetivo, ranking y dashboards.",
     "version": "1.4.0",
     "category": "Surveys",
     "author": "Your Company",
     "website": "https://www.example.com",
+    "license": "LGPL-3",
 
-    # Dependencias (módulos requeridos)
-    "depends": ["base", "survey"],
+    # ============================================================
+    # DEPENDENCIAS
+    # ============================================================
+    # Nota: 'survey' ya trae web/views necesarias. No añadimos más.
+    "depends": [
+        "base",
+        "survey",
+    ],
 
-    # Archivos de datos y vistas
+    # ============================================================
+    # DATA (ORDEN IMPORTANTE)
+    # 1) Seguridad primero
+    # 2) Data (secuencias, crons, catálogos…)
+    # 3) Vistas/acciones (incluye la ACCIÓN de Dispositivos)
+    # 4) Menús (último, para que ya existan acciones y vistas)
+    # ============================================================
     "data": [
+        # --- Seguridad ---
         "security/ir.model.access.csv",
+
+        # --- Data inicial / técnica ---
         "data/audience_categories.xml",
         "data/question_categories.xml",
         "data/survey_sequence.xml",
         "data/survey_trash_cron.xml",
-    "views/survey_extension_menu.xml",
-    "views/survey_user_input_inherit_views.xml",
-    "views/survey_survey_inherit_views.xml",
-    "views/survey_device_control_views.xml",
-    "views/survey_ranking_dashboard_views.xml",
-    "views/survey_device_templates.xml",
-    "views/report_survey_summary.xml",
+
+        # --- Vistas y acciones (UI) ---
+        # IMPORTANTE: Los wizards deben cargarse ANTES de las vistas que los referencian
         "views/survey_edit_question_title_wizard_views.xml",
         "views/survey_version_wizard_views.xml",
         "views/survey_code_selection_wizard_views.xml",
+        "views/survey_assign_device_wizard_views.xml",
+        
+        # Dispositivos: define vistas + acción (action_survey_device)
+        # DEBE ir DESPUÉS del wizard porque lo referencia
+        "views/survey_device_views.xml",
+
+        # Herencias / vistas existentes del módulo
+        "views/survey_user_input_inherit_views.xml",
+        "views/survey_survey_inherit_views.xml",
+        "views/survey_ranking_dashboard_views.xml",
+        "views/report_survey_summary.xml",
         "views/survey_trash_views.xml",
         "views/survey_key_counter_views.xml",
         "views/survey_templates.xml",
         "views/survey_scoring_templates.xml",
         "views/survey_calificacion_average_views.xml",
+
+        # --- Menús (siempre al final) ---
+        "views/survey_extension_menu.xml",
     ],
 
-    # Archivos estáticos (frontend)
+    # ============================================================
+    # ASSETS (FRONTEND/BACKEND)
+    # Mantengo exactamente tus rutas y agrego comentarios.
+    # OJO: verifica que los nombres de archivo coincidan 1:1 con /static/src/js/
+    # ============================================================
     "assets": {
+        # Recursos que carga el frontend público de encuestas (widgets JS/SCSS)
         "survey.survey_assets": [
             "survey_extension/static/src/js/survey_conditional_questions.js",
             "survey_extension/static/src/js/survey_answer_attachments.js",
-            "survey_extension/static/src/js/survey_device_capture.js",
             "survey_extension/static/src/scss/survey_extension.scss",
         ],
-        "web.assets_frontend": [],
+        # Backend (vistas Odoo / dashboards)
         "web.assets_backend": [
             "survey_extension/static/src/scss/survey_ranking_dashboard.scss",
-            "survey_extension/static/src/js/survey_ranking_graphs.js",
         ],
+        # Dejamos definidas aunque vacías (como ya las tenías)
+        "web.assets_frontend": [],
         "web.assets_tests": [],
     },
 
-    # Configuración
+    # ============================================================
+    # CONFIG
+    # ============================================================
     "application": False,
     "installable": True,
-    "license": "LGPL-3",
 
-    # Hooks
+    # ============================================================
+    # HOOKS (ya definidos en tu hooks.py)
+    # ============================================================
     "pre_init_hook": "migrate_version_year_to_char",
     "post_init_hook": "post_init_hook",
 }
