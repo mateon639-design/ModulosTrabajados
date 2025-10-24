@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- purchase_order_line pivot view -->
+        <record id="purchase_order_line_view_pivot" model="ir.ui.view">
+            <field name="name">purchase.order.line.view.pivot</field>
+            <field name="model">purchase.order.line</field>
+            <field name="arch" type="xml">
+                <pivot string="Comparativo">
+                    <field name="partner_id" type="col"/>
+                    <field name="payment_term" type="col"/>
+                    <field name="product_id" type="row"/>
+                    <field name="product_qty" type="measure"/>
+                    <field name="price_unit" type="measure"/>
+                    <field name="price_subtotal" type="measure"/>                    
+                </pivot>
+            </field>
+        </record>
+    </data>
+</odoo>

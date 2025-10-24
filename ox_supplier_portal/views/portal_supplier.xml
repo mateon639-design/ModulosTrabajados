@@ -1,0 +1,708 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<template id="supplier" name="Proveedores">
+		<t t-call="website.layout">
+			<div id="wrap" class="oe_structure oe_empty">
+				<section class="s_title o_colored_level pb0 pt0" data-vcss="001" data-snippet="s_title" data-name="Título" style="background-image: none;">
+					<div class="s_allow_columns container">
+						<div class="row">
+							<div class="o_colored_level pt0 col-lg-12">
+								<p style="text-align: center;">
+									<font style="font-size: 62px;" class="o_default_snippet_text">
+										<span style="font-size: 24px;">
+											<strong>Registro de Proveedores​</strong>
+										</span>
+									</font>
+									<br/>
+								</p>
+							</div>
+						</div>
+					</div>
+				</section>
+				<section class="s_text_block o_colored_level pt0 pb0" data-snippet="s_text_block" data-name="Texto" style="background-image: none;">
+					<div class="s_allow_columns container">
+						<div class="row o_grid_mode" data-row-count="4">
+							<div class="o_colored_level o_grid_item g-col-lg-12 g-height-4 col-lg-12 border" style="grid-area: 1 / 1 / 5 / 13; z-index: 1;">
+								<p class="o_default_snippet_text" style="margin-bottom: 0px; text-align: justify;">
+									<span style="font-size: 14px;">Autorización tratamiento de datos: Al diligenciar el siguiente formulario&amp;nbsp;autorizo a lorem ipsum&amp;nbsp;</span>
+									<span style="background-color: var(--body-bg); color: var(--body-color); font-family: var(--body-font-family); font-weight: var(--body-font-weight); text-align: var(--body-text-align); font-size: 14px;">LTDA o a quien represente en el futuro la calidad de acreedor, desde ya, para&amp;nbsp;</span>
+									<span style="background-color: var(--body-bg); color: var(--body-color); font-family: var(--body-font-family); font-weight: var(--body-font-weight); font-size: 14px;">consultar, reportar, procesar, solicitar y divulgar a la Central de Información Financiera - CIFIN- que administra la Asociación Bancaria y de Entidades Financieras de Colombia, o a cualquier otra entidad que maneje o administre bases de datos con los mismos fines, toda la información referente a mi comportamiento comercial. Lo anterior implica que el cumplimiento o&amp;nbsp;</span>
+									<span style="text-align: var(--body-text-align); color: var(--body-color); font-family: var(--body-font-family); font-weight: var(--body-font-weight); background-color: var(--body-bg); font-size: 14px;">incumplimiento de sus obligaciones se reflejará en las mencionadas bases de&amp;nbsp;</span>
+									<span style="background-color: var(--body-bg); color: var(--body-color); font-family: var(--body-font-family); font-weight: var(--body-font-weight); font-size: 14px;">datos, en donde se consignan de manera completa, todos los datos referentes a mi comportamiento comercial.&amp;nbsp;</span>
+									<span style="font-size: 14px;">La suscripción de este documento implica la aceptación de las condiciones en él contenidas, y por constituir un acuerdo de voluntades genera efectos contractuales. Los datos personales que en virtud del presente documento, el CLIENTE/PROVEEDORES transmite&amp;nbsp;con lorem ipsum LTDA, serán tratados conforme al reglamento para tratamiento de datos personales,&amp;nbsp;</span>
+									<span style="background-color: var(--body-bg); color: var(--body-color); font-family: var(--body-font-family); font-weight: var(--body-font-weight); text-align: var(--body-text-align); font-size: 14px;">de la empresa y los parámetros establecidos en la Ley estatutaria 1581 de 2012 y sus decretos reglamentarios. Contemplado en la Política de Tratamiento de Datos Personales publicada en&amp;nbsp;</span>
+									<a href="https://www.lorem ipsum.com.co" style="background-color: var(--body-bg); font-family: var(--body-font-family); font-weight: var(--body-font-weight); text-align: var(--body-text-align);">
+										<span style="font-size: 14px;">www.lorem ipsum.com.co</span>
+									</a>
+								</p>
+							</div>
+						</div>
+					</div>
+				</section>
+				<section t-if="note" class="s_text_block o_colored_level pt0 pb0" data-snippet="s_text_block" data-name="Texto" style="background-image: none;">
+					<div class="s_allow_columns container">
+						<div class="row o_grid_mode" data-row-count="2">
+							<div class="o_colored_level o_grid_item g-col-lg-12 g-height-2 col-lg-12 border" style="grid-area: 1 / 1 / 5 / 13; z-index: 1;">
+								<p class="o_default_snippet_text" style="margin-bottom: 0px; text-align: justify;color:#BB1A00">
+									Nota: <span t-esc="note" />
+								</p>
+							</div>
+						</div>
+					</div>
+				</section>
+				<section class="s_faq_collapse pt32 pb32 o_colored_level" data-snippet="s_faq_collapse" data-name="Acordeón" style="background-image: none; position: relative;">
+					<div class="container">
+						<div id="myCollapse" class="accordion" role="tablist">
+							<div class="card" data-name="Item">
+								<a href="#" role="tab" data-bs-toggle="collapse" aria-expanded="false" class="card-header o_default_snippet_text collapsed" data-bs-target="#myCollapseTab1">Proveedor</a>
+								<div data-bs-parent="#myCollapse" role="tabpanel" class="collapse" id="myCollapseTab1">
+									<div class="card-body">
+										<section class="s_website_form_supplier pt16 pb16" data-vcss="001" data-snippet="s_website_form_supplier" data-name="Formulario">
+											<div class="container">
+												<p>
+													Complete las secciones del presente formulario y una vez finalizado y validado el proceso, recibirá un correo electrónico con la confirmación de su registro como proveedor. 
+												</p>
+												<form id="frp1" action="" data-force_action="/my/supplier/register" method="post" enctype="multipart/form-data" class="o_mark_required" data-mark="*">
+													<div class="s_website_form_rows row s_col_no_bgcolor">
+														<div class="s_website_form_field mb-3 col-12" data-type="selection" data-name="Field">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-sm-auto s_website_form_label" style="width: 200px;">
+																	<span class="s_website_form_label_content">Tipo de compañía</span>
+																</label>
+																<div class="col-sm">
+																	<div class="row s_col_no_resize s_col_no_bgcolor s_website_form_multiple" data-name="company_type" data-display="horizontal">
+																		<div class="radio col-12 col-lg-4 col-md-6">
+																			<input type="hidden" name="frp" value="1"/>
+																			<div class="form-check">
+																				<input type="radio" disabled="disabled" class="s_website_form_input form-check-input" name="company_type" value="person" t-att-checked="'checked' if company_type == 'person' else None" />
+																				<label class="form-check-label s_website_form_check_label">Individual</label>
+																			</div>
+																		</div>
+																		<div class="radio col-12 col-lg-4 col-md-6">
+																			<div class="form-check">
+																				<input type="radio" disabled="disabled" class="s_website_form_input form-check-input" name="company_type" value="company" t-att-checked="'checked' if company_type == 'company' else None"/>
+																				<label class="form-check-label s_website_form_check_label">Compañía</label>
+																			</div>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</div>
+														<div class="s_website_form_field mb-3 col-12" data-type="many2one" data-name="Field">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-4 s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Tipo / Número Identificación</span>
+																</label>
+																<div class="col-sm-4">
+																	<select class="form-select s_website_form_input" name="l10n_latam_identification_type_id" disabled="disabled">
+																		<option value="0" t-att-selected="'selected' if l10n_latam_identification_type_id not in (4, 5, 9) else None">-- Seleccionar -- </option>
+																		<option value="4" t-att-selected="'selected' if l10n_latam_identification_type_id == 4 else None">NIT</option>
+																		<option value="5" t-att-selected="'selected' if l10n_latam_identification_type_id == 5 else None">Cédula de ciudadanía</option>
+																		<option value="9" t-att-selected="'selected' if l10n_latam_identification_type_id == 9 else None">Cédula de extranjería</option>
+																	</select>
+																</div>
+																<div class="col-sm-4">
+																	<input type="text" class="form-control s_website_form_input" name="partner_ref_contact" required="true" placeholder="" id="ok88atbwe5ml" t-att-value="partner_ref_contact" disabled="disabled"/>
+																</div>
+															</div>
+														</div>
+														<div class="s_website_form_field mb-3 col-12" data-type="char" data-name="Field">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px;">
+																	<span class="s_website_form_label_content">Razón Social</span>
+																	<span class="s_website_form_mark">*</span>
+																</label>
+																<div class="col-sm">
+																	<input type="text" class="form-control s_website_form_input" name="partner_name" required="true" placeholder="" t-att-value="partner_name" disabled="disabled"/>
+																</div>
+															</div>
+														</div>
+														<div class="s_website_form_field mb-3 col-12" data-type="email" data-name="Field">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px">
+																	<span class="s_website_form_label_content">Correo electrónico</span>
+																	<span class="s_website_form_mark">*</span>
+																</label>
+																<div class="col-sm">
+																	<input type="email" class="form-control s_website_form_input disabled" name="partner_email" required="1" placeholder="empresa@micorreo.com" t-att-value="partner_email"/>
+																</div>
+															</div>
+														</div>
+
+														<!-- Pais / Depto / Ciudad -->
+														<div class="s_website_form_field mb-3 col-12" data-type="many2one" data-name="Field">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">País / Depto / Ciudad</span>
+																</label>
+																<div class="col-sm">
+																	<select class="form-select s_website_form_input" name="country_id">
+																		<option value="49" selected="selected">Colombia</option>
+																	</select>
+																</div>
+																<div class="col-sm">
+																	<select class="form-select s_website_form_input" name="state_id" required="true">
+																		<option value="0" selected="selected">-- Seleccionar --</option>
+																		<t t-foreach="country_states" t-as="state_id">
+																			<option t-att-value="state_id.id" t-att-selected="partner_state_id if partner_state_id == state_id.id else None">
+																				<t t-out="state_id.name" />
+																			</option>
+																		</t>
+																	</select>
+																</div>
+																<div class="col-sm">
+																	<select class="form-select s_website_form_input" name="city_id" required="true">
+																		<option value="0" selected="selected">-- Seleccionar --</option>
+																		<t t-foreach="city_states" t-as="city_id">
+																			<option t-att-value="city_id.id" t-att-selected="partner_city_id if partner_city_id == city_id.id else None">
+																				<t t-out="city_id.name" />
+																			</option>
+																		</t>
+																	</select>
+																</div>
+															</div>
+														</div>
+														<div class="s_website_form_field mb-3 col-12" data-type="char" data-name="Field">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px;">
+																	<span class="s_website_form_label_content">Dirección</span>
+																</label>
+																<div class="col-sm">
+																	<input type="text" class="form-control s_website_form_input" name="partner_street" value="" placeholder="" t-att-value="partner_street" required="true"/>
+																</div>
+															</div>
+														</div>
+														<div class="s_website_form_field mb-3 col-12" data-type="tel" data-name="Field">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px;">
+																	<span class="s_website_form_label_content">Celular</span>
+																</label>
+																<div class="col-sm">
+																	<input type="tel" class="form-control s_website_form_input" name="partner_mobile" t-att-value="partner_mobile" required="true"/>
+																</div>
+															</div>
+														</div>
+
+														<div class="s_website_form_field mb-3 col-12" data-type="char" data-name="Field">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Sitio Web</span>
+																</label>
+																<div class="col-sm">
+																	<input type="text" class="form-control s_website_form_input" name="partner_web" value="" placeholder="" t-att-value="partner_web"/>
+																</div>
+															</div>
+														</div>
+														<hr />
+														<div class="s_website_form_field mb-3 col-12" data-type="char" data-name="Field" t-if="company_type == 'company'">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Representante Legal</span>
+																</label>
+																<div class="col-sm">
+																	<input type="text" class="form-control s_website_form_input" name="rep_leg_name" t-att-value="rep_leg_name" placeholder="" required="true"/>
+																</div>
+															</div>
+														</div>
+														<div class="s_website_form_field mb-3 col-12" data-type="many2one" data-name="Field" t-if="company_type == 'company'">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-4 s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Tipo / Número Identificación</span>
+																</label>
+																<div class="col-sm-4">
+																	<select class="form-select s_website_form_input" name="rep_leg_identification_type_id">
+																		<option value="0" t-att-selected="'selected' if rep_leg_identification_type_id not in (5, 9) else None">-- Seleccionar -- </option>
+																		<option value="5" t-att-selected="'selected' if rep_leg_identification_type_id == 5 else None">Cédula de ciudadanía</option>
+																		<option value="9" t-att-selected="'selected' if rep_leg_identification_type_id == 9 else None">Cédula de extranjería</option>
+																	</select>
+																</div>
+																<div class="col-sm-4">
+																	<input type="text" class="form-control s_website_form_input" name="rep_leg_ref" required="true" placeholder="" t-att-value="rep_leg_ref"/>
+
+																</div>
+															</div>
+														</div>
+														<div class="s_website_form_field mb-3 col-12" data-type="char" data-name="Field" t-if="company_type == 'company'">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Correo electrónico</span>
+																</label>
+																<div class="col-sm">
+																	<input type="text" class="form-control s_website_form_input" name="rep_leg_email" t-att-value="rep_leg_email" placeholder="" required="true"/>
+																</div>
+															</div>
+														</div>
+														<div class="s_website_form_field mb-3 col-12" data-type="char" data-name="Field" t-if="company_type == 'company'">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Celular</span>
+																</label>
+																<div class="col-sm">
+																	<input type="text" class="form-control s_website_form_input" name="rep_leg_mobile" t-att-value="rep_leg_mobile" placeholder="" />
+																</div>
+															</div>
+														</div>
+														<div class="mb-0 py-2 col-12 s_website_form_submit" data-name="Submit Button">
+															<div style="width: 200px;" class="s_website_form_label"/>
+															<a href="#" id="btn-frp1-submit" role="button" class="btn btn-primary btn-lg s_website_form_send_supplier o_default_snippet_text" data-bs-original-title="" title="">Guardar y continuar</a>
+
+															<span id="s_website_form_result"/>
+														</div>
+													</div>
+												</form>
+											</div>
+										</section>
+									</div>
+								</div>
+							</div>
+							<div class="card" data-name="Item">
+								<a href="#" role="tab" data-bs-toggle="collapse" aria-expanded="false" class="card-header o_default_snippet_text collapsed" data-bs-target="#myCollapseTab2">Información Tributaria</a>
+								<div data-bs-parent="#myCollapse" role="tabpanel" class="collapse" id="myCollapseTab2">
+									<div class="card-body">
+										<section class="s_website_form_supplier pt16 pb16" data-vcss="001" data-snippet="s_website_form_supplier" data-name="Formulario">
+											<div class="container">
+												<form id="frp2" action="" data-force_action="/my/supplier/register" method="post" enctype="multipart/form-data" class="o_mark_required" data-mark="*">
+													<div class="s_website_form_rows row s_col_no_bgcolor">
+														<div class="s_website_form_field mb-3 col-12" data-type="many2one" data-name="Field">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Posición Fiscal</span>
+																</label>
+																<div class="col-sm">
+																	<select class="form-select s_website_form_input" name="partner_f_position_id" required="true">
+																		<option value="0" selected="selected">-- Seleccionar --</option>
+																		<t t-foreach="fiscal_positions" t-as="position_id">
+																			<option t-att-value="position_id.id" t-att-selected="partner_f_position_id if partner_f_position_id == position_id.id else None">
+																				<t t-out="position_id.name" />
+																			</option>
+																		</t>
+																	</select>
+																	<input type="hidden" name="frp" value="2"/>
+																</div>
+															</div>
+														</div>
+														<div class="s_website_form_field mb-3 col-12" data-type="boolean" data-name="Field">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class=" col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Maneja Retención</span>
+																</label>
+																<div class="col-sm">
+																	<div class="form-check">
+																		<input type="checkbox" name="partner_maneja_retencion" t-att-value="partner_maneja_retencion" class="s_website_form_input form-check-input" t-att-checked="'checked' if partner_maneja_retencion else None" />
+																	</div>
+																</div>
+															</div>
+														</div>
+														<div class="s_website_form_field mb-3 col-12" data-type="char" data-name="Field">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Actividad Económica</span>
+																</label>
+																<div class="col-sm">
+																	<input type="text" class="form-control s_website_form_input" name="partner_economic_activity" t-att-value="partner_economic_activity" placeholder="Ingrese los códigos de la actividad separados por coma (,). Ej: 1001,5420,4012..." />
+																</div>
+															</div>
+														</div>
+														<div class="s_website_form_field mb-3 col-12" data-type="many2one" data-name="Field">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Tipo sociedad</span>
+																</label>
+																<div class="col-sm">
+																	<select class="form-select s_website_form_input" name="partner_society_id" required="true">
+																		<option value="0" selected="selected">-- Seleccionar --</option>
+																		<t t-foreach="partner_society_t" t-as="society">
+																			<option t-att-value="society.id" t-att-selected="partner_society_id if partner_society_id == society.id else None">
+																				<t t-out="society.name" />
+																			</option>
+																		</t>
+																	</select>
+																</div>
+															</div>
+														</div>
+														<div class="mb-0 py-2 col-12 s_website_form_submit" data-name="Submit Button">
+															<div style="width: 200px;" class="s_website_form_label"/>
+															<a href="#" id="btn-frp2-submit" role="button" class="btn btn-primary btn-lg s_website_form_send_supplier o_default_snippet_text">Guardar y continuar</a>
+															<span id="s_website_form_result"/>
+														</div>
+													</div>
+												</form>
+											</div>
+										</section>
+										<p class="card-text o_default_snippet_text">
+											<br/>
+										</p>
+									</div>
+								</div>
+							</div>
+							<div class="card" data-name="Item">
+								<a href="#" role="tab" data-bs-toggle="collapse" aria-expanded="false" class="card-header o_default_snippet_text collapsed" data-bs-target="#myCollapseTab3">Método de pago</a>
+								<div data-bs-parent="#myCollapse" role="tabpanel" class="collapse" id="myCollapseTab3">
+									<div class="card-body">
+										<p class="card-text o_default_snippet_text">
+											<br/>
+										</p>
+										<section class="s_website_form_supplier pt16 pb16" data-vcss="001" data-snippet="s_website_form_supplier" data-name="Formulario">
+											<div class="container">
+												<form id="frp3" action="" data-force_action="/my/supplier/register" method="post" enctype="multipart/form-data" class="o_mark_required" data-mark="*">
+													<div class="s_website_form_rows row s_col_no_bgcolor">
+														<div class="s_website_form_field mb-3 col-12" data-type="many2one" data-name="Field">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Banco</span>
+																</label>
+																<div class="col-sm">
+																	<select class="form-select s_website_form_input" name="partner_bank_id" required="true">
+																		<option value="0" selected="selected">-- Seleccionar --</option>
+																		<t t-foreach="partner_banks" t-as="partner_bank">
+																			<option t-att-value="partner_bank.id" t-att-selected="partner_bank_id if partner_bank_id == partner_bank.id else None">
+																				<t t-out="partner_bank.name" />
+																			</option>
+																		</t>
+																	</select>
+																	<input type="hidden" name="frp" value="3"/>
+																</div>
+															</div>
+														</div>
+														<div class="s_website_form_field mb-3 col-12" data-type="char" data-name="Field" data-visibility-between="">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">N. Cuenta</span>
+																</label>
+																<div class="col-sm">
+																	<input type="text" class="form-control s_website_form_input" name="partner_account_bank" required="true" t-att-value="partner_account_bank"/>
+																</div>
+															</div>
+														</div>
+														<div class="s_website_form_field mb-3 col-12" data-type="many2one" data-name="Field">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Tipo cuenta</span>
+																</label>
+																<div class="col-sm">
+																	<select class="form-select s_website_form_input" name="partner_account_type">
+																		<option value="Ahorros" selected="selected">Ahorros</option>
+																		<option value="Corriente">Corriente</option>
+																	</select>
+																</div>
+															</div>
+														</div>
+														<!-- <div class="s_website_form_field mb-3 col-12" data-type="many2one" data-name="Field">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Ciudad</span>
+																</label>
+																<div class="col-sm">
+																	<select class="form-select s_website_form_input" name="city_id"></select>
+																</div>
+															</div>
+														</div> -->
+														<div class="s_website_form_field mb-3 col-12" data-type="many2one" data-name="Field">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Plazo de pago de cliente</span>
+																</label>
+																<div class="col-sm">
+																	<select class="form-select s_website_form_input" name="partner_payment_term_id" required="true">
+																		<option value="0" selected="selected">-- Seleccionar --</option>
+																		<t t-foreach="payment_terms_ids" t-as="payment_term">
+																			<option t-att-value="payment_term.id" t-att-selected="partner_payment_term_id if partner_payment_term_id == payment_term.id else None">
+																				<t t-out="payment_term.name" />
+																			</option>
+																		</t>
+																	</select>
+																</div>
+															</div>
+														</div>
+														<div class="mb-0 py-2 col-12 s_website_form_submit" data-name="Submit Button">
+															<div style="width: 200px;" class="s_website_form_label"/>
+															<a href="#" role="button" class="btn btn-primary btn-lg s_website_form_send_supplier o_default_snippet_text">Guardar y continuar</a>
+															<span id="s_website_form_result"/>
+														</div>
+													</div>
+												</form>
+											</div>
+										</section>
+									</div>
+								</div>
+							</div>
+							<div class="card" data-name="Item">
+								<a href="#" role="tab" data-bs-toggle="collapse" aria-expanded="false" class="card-header o_default_snippet_text collapsed" data-bs-target="#myCollapseTab4">Referencias</a>
+								<div data-bs-parent="#myCollapse" role="tabpanel" class="collapse" id="myCollapseTab4">
+									<div class="card-body">
+										<p class="card-text o_default_snippet_text">
+											<br/>
+										</p>
+										<section class="s_website_form_supplier pt16 pb16" data-vcss="001" data-snippet="s_website_form_supplier" data-name="Formulario">
+											<div class="container">
+												<form id="frp4" action="" data-force_action="/my/supplier/register" method="post" enctype="multipart/form-data" class="o_mark_required" data-mark="*">
+													<div class="s_website_form_rows row s_col_no_bgcolor">
+
+														<div class="s_website_form_field mb-3 col-12">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px">
+																	<span class="s_website_form_label_content">Contacto</span>
+																	<span class="s_website_form_mark">*</span>
+																</label>
+																<div class="col-sm">
+																	<input type="text" class="form-control text-uppercase" name="ref_name" placeholder="" />
+																</div>
+																<label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px">
+																	<span class="s_website_form_label_content">Tipo Referencia</span>
+																</label>
+																<div class="col-sm">
+																	<select class="form-select" name="ref_type">
+																		<option value="Referencia Personal">Referencia Personal</option>
+																		<option value="Referencia Familiar">Referencia Familiar</option>
+																		<option value="Referencia Comercial">Referencia Comercial</option>
+																	</select>
+																</div>
+															</div>
+														</div>
+														<div class="s_website_form_field mb-3 col-12">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Empresa</span>
+																</label>
+																<div class="col-sm">
+																	<input type="text" class="form-control text-uppercase" name="ref_cargo" value="" placeholder="" />
+																</div>
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Direccion</span>
+																</label>
+																<div class="col-sm">
+																	<input type="text" class="form-control text-uppercase" name="ref_street" value="" placeholder="" />
+																</div>
+															</div>
+														</div>
+														<div class="s_website_form_field mb-3 col-12">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Celular</span>
+																</label>
+																<div class="col-sm">
+																	<input type="text" class="form-control text-uppercase" name="ref_mobile"/>
+																</div>
+																<label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+																	<span class="s_website_form_label_content">Correo electrónico</span>
+																</label>
+																<div class="col-sm">
+																	<input type="email" class="form-control text-lowercase" name="ref_email" value="" placeholder="" />
+																</div>
+															</div>
+														</div>
+														<div class="mb-0 py-2 col-12">
+															<div style="width: 200px;" class="s_website_form_label"/>
+															<a id="btnAddReference" href="#" role="button" class="btn btn-primary btn-lg">Adicionar</a>
+														</div>
+
+
+														<hr />
+
+														<div class="s_website_form_field mb-3 col-12">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<table class="table table-hover" id="tbReference">
+																	<thead>
+																		<tr>
+																			<th scope="col">#</th>
+																			<th scope="col">Contacto</th>
+																			<th scope="col">Tipo</th>
+																			<th scope="col">Empresa</th>
+																			<th scope="col">Dirección</th>
+																			<th scope="col">Celular</th>
+																			<th scope="col">Correo electrónico</th>
+																			<th scope="col"></th>
+																		</tr>
+																	</thead>
+																	<tbody>
+																		<t t-set="number" t-value="0"/>
+																		<t t-foreach="contact_ids" t-as="contact">
+																			<t t-set="number" t-value="number + 1"/>
+																			<tr>
+																				<th scope="col">
+																					<t t-esc="number" />
+																				</th>
+																				<td scope="col">
+																					<t t-esc="contact.name.upper()" />
+																				</td>
+																				<td scope="col">
+																					<t t-esc="contact.tipo_contacto" />
+																				</td>
+																				<td scope="col">
+																					<t t-esc="contact.function" />
+																				</td>
+																				<td scope="col">
+																					<t t-esc="contact.street" />
+																				</td>
+																				<td scope="col">
+																					<t t-esc="contact.mobile" />
+																				</td>
+																				<td scope="col">
+																					<t t-esc="contact.email" />
+																				</td>
+																				<td scope="col">
+																					<a href="#" name="deleteRow" class="btn btn-primary fa fa-close" />
+																					<input type="hidden" t-att-value="contact.id"/>
+																				</td>
+																			</tr>
+																		</t>
+																	</tbody>
+																</table>
+															</div>
+														</div>
+
+														<input type="hidden" name="frp" value="4"/>
+														<input type="hidden" class="form-control s_website_form_input" name="ref_data" value="0" placeholder=""/>
+
+														<div class="mb-0 py-2 col-12 s_website_form_submit" data-name="Submit Button">
+															<div style="width: 200px;" class="s_website_form_label"/>
+															<a href="#" role="button" class="btn btn-primary btn-lg s_website_form_send_supplier o_default_snippet_text">Guardar y continuar</a>
+															<span id="s_website_form_result"/>
+														</div>
+
+													</div>
+												</form>
+											</div>
+										</section>
+									</div>
+								</div>
+							</div>
+
+							<div class="card" data-name="Item">
+								<a href="#" role="tab" data-bs-toggle="collapse" aria-expanded="false" class="card-header o_default_snippet_text collapsed" data-bs-target="#myCollapseTab5">Requisitos</a>
+								<div data-bs-parent="#myCollapse" role="tabpanel" class="collapse" id="myCollapseTab5">
+									<div class="card-body">
+										<p class="card-text o_default_snippet_text">
+											<br/>
+										</p>
+										<section class="s_website_form_supplier pt16 pb16" data-vcss="001" data-snippet="s_website_form_supplier" data-name="Formulario">
+											<div class="container">
+												<form id="frp5" action="" data-force_action="/my/supplier/register" method="post" enctype="multipart/form-data" class="o_mark_required" data-mark="*">
+													<div class="s_website_form_rows row s_col_no_bgcolor">
+
+														<div class="s_website_form_field mb-3 col-12">
+															<div class="row s_col_no_resize s_col_no_bgcolor">
+																<table class="table table-hover" id="tbRequirements">
+																	<thead>
+																		<tr>
+																			<th scope="col">#</th>
+																			<th scope="col" width="150px">Requisito</th>
+																			<th scope="col">Tipo</th>
+																			<th scope="col">Observacion</th>
+																			<th scope="col">Archivo</th>
+																			<th scope="col" width="10px">Estado</th>
+																			<th scope="col"></th>
+																		</tr>
+																	</thead>
+																	<tbody>
+																		<t t-set="number" t-value="0"/>
+																		<t t-foreach="requirements" t-as="requirement">
+																			<t t-set="number" t-value="number + 1"/>
+																			<tr>
+																				<th scope="col">
+																					<t t-esc="number" />
+																				</th>
+																				<td scope="col">
+																					<t t-esc="requirement.requirement_id.name"/>
+																				</td>
+																				<td scope="col">
+																					<t t-esc="'Obligatorio' if not requirement.req_optional else 'Opcional'" />
+																				</td>
+																				<td scope="col" class="s_website_form_field">
+																					<input type="text" class="form-control s_website_form_input" t-att-name="'t_note@' + str(requirement.id)" t-att-disabled="'disabled' if requirement.completed else None" />
+																				</td>
+																				<td scope="col" class="s_website_form_field">
+																					<input type="file" class="form-control s_website_form_input file" t-att-name="'t_att@' + str(requirement.id)" t-att-required="'true' if not requirement.req_optional else None" t-att-disabled="'disabled' if requirement.completed else None" accept=".jpg,.jpeg,.png,.pdf" />
+																				</td>
+																				<td scope="col">
+																					<t t-esc="'Completado' if requirement.completed else '-'" />
+																				</td>
+																				<td scope="col">
+																					<input type="hidden" t-att-value="requirement.id"/>
+																				</td>
+																			</tr>
+																		</t>
+																	</tbody>
+																</table>
+															</div>
+														</div>
+
+														<input type="hidden" name="frp" value="5"/>
+
+
+
+														<br />
+														<br />
+														<hr />
+														<div class="mb-0 py-2 col-12 s_website_form_submit" data-name="Submit Button">
+															<div style="width: 200px;" class="s_website_form_label"/>
+															<a href="#" role="button" class="btn btn-primary btn-lg s_website_form_send_supplier o_default_snippet_text">Guardar y continuar</a>
+															<span id="s_website_form_result"/>
+														</div>
+
+													</div>
+												</form>
+											</div>
+										</section>
+									</div>
+								</div>
+							</div>
+
+							<div class="card" data-name="Item">
+								<a href="#" role="tab" data-bs-toggle="collapse" aria-expanded="false" class="card-header o_default_snippet_text collapsed" data-bs-target="#myCollapseTab6">Políticas</a>
+								<div data-bs-parent="#myCollapse" role="tabpanel" class="collapse" id="myCollapseTab6">
+									<div class="card-body">
+										<p class="card-text o_default_snippet_text">
+											<br/>
+										</p>
+										<section class="s_website_form_supplier pt16 pb16" data-vcss="001" data-snippet="s_website_form_supplier" data-name="Formulario">
+											<div class="container">
+												<form id="frp6" action="" data-force_action="/my/supplier/register" method="post" enctype="multipart/form-data" class="o_mark_required" data-mark="*">
+													<div class="s_website_form_rows row s_col_no_bgcolor">
+														<div class="s_website_form_field mb-3 col-12">
+															<t t-foreach="supplier_policies" t-as="policy">
+																<div class="row s_col_no_resize s_col_no_bgcolor">
+																	<div class="col-12 col-sm">
+																		<strong><t t-out="policy.name"/>:</strong><span t-esc="policy.description" />
+																	</div><br />
+																	<label class="col-form-label col-sm-auto s_website_form_label">
+																		<span class="s_website_form_label_content">¿Acepto <t t-out="policy.name" />?</span>
+																	</label>
+																	<div class="col-sm">
+																		<div class="form-check">
+																			<input type="checkbox" class=".form-check-input s_website_form_input" t-att-name="'partner_chk_policy_' + str(policy.id)" required="true"/>
+																		</div>
+																	</div>
+																</div>
+																<hr />
+															</t>
+														</div>
+														<input type="hidden" name="frp" value="6"/>
+														<br />
+														<br />
+														<div class="mb-0 py-2 col-12 s_website_form_submit" data-name="Submit Button">
+															<div style="width: 200px;" class="s_website_form_label"/>
+															<a href="#" role="button" class="btn btn-primary btn-lg s_website_form_send_supplier o_default_snippet_text">Guardar y finalizar</a>
+															<span id="s_website_form_result"/>
+														</div>
+
+													</div>
+												</form>
+											</div>
+										</section>
+									</div>
+								</div>
+							</div>
+
+						</div>
+						<br />
+						<br />
+						<div class="text-center">
+							<a t-attf-href="/my" class="btn btn-secondary">Regresar Al Inicio</a>
+						</div>
+					</div>
+				</section>
+			</div>
+		</t>
+	</template>
+</odoo>

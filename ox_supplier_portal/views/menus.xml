@@ -1,0 +1,10 @@
+<odoo>
+    <data>
+        
+        <menuitem id="supplier_portal_menu" name="Proveedores" sequence="30" />
+        <menuitem id="supplier_portal_menu_sub" parent="supplier_portal_menu" name="Portal - Proveedores" sequence="30" />
+        <menuitem id="supplier_portal_link_up" name="Vinculación de proveedores" parent="supplier_portal_menu_sub" sequence="200" action="res_partner_supplier_action" groups="ox_supplier_portal.admin_proveedor"/>
+        <menuitem id="supplier_portal_req" name="Requisitos" parent="supplier_portal_menu_sub" sequence="300" action="res_partner_supplier_req_action" groups="ox_supplier_portal.admin_proveedor"/>
+        <menuitem id="supplier_portal_policy" name="Políticas" parent="supplier_portal_menu_sub" action="res_partner_supplier_policy_action" sequence="400"/>
+    </data>
+</odoo>

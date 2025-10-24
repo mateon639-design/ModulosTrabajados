@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+        <!-- res.partner.supplier.policy action window -->
+        <record id="res_partner_supplier_policy_action" model="ir.actions.act_window">
+            <field name="name">Políticas Portal Proveedor</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.partner.supplier.policy</field>
+            <field name="view_mode">list,form</field>            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Crear Nueva Politica!
+                </p>
+                <p>
+                    No hay registros creados!
+                </p>
+            </field>
+        </record>
+
+        <!-- res.partner.supplier.policy list view -->
+        <record id="res_partner_supplier_policy_view_list" model="ir.ui.view">
+            <field name="name">res.partner.supplier.policy.view.list</field>
+            <field name="model">res.partner.supplier.policy</field>
+            <field name="arch" type="xml">
+                <list create="false" delete="false">
+                    <field name="name"/>
+                    <field name="description"/>
+                </list>
+            </field>
+        </record>
+    </data>
+</odoo>

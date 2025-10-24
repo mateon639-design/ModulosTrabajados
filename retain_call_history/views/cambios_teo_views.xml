@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- =========================
+         LIST (Listado)
+         ========================= -->
+    <record id="view_cambios_teo_list" model="ir.ui.view">
+        <field name="name">cambios.teo.list</field>
+        <field name="model">cambios.teo</field>
+        <field name="arch" type="xml">
+            <list string="Cursos TEO (IA)">
+                <field name="name"/>
+                <field name="pass_score" string="Puntaje mínimo (%)"/>
+                <field name="video_url"/>
+                <field name="create_date" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- =========================
+         FORM (Detalle)
+         ========================= -->
+    <record id="view_cambios_teo_form" model="ir.ui.view">
+        <field name="name">cambios.teo.form</field>
+        <field name="model">cambios.teo</field>
+        <field name="arch" type="xml">
+            <form string="Curso TEO (IA)">
+                <header>
+                    <button name="action_generate_quick_content"
+                            type="object"
+                            string="Generar contenido rápido"
+                            class="btn-primary"/>
+                    <button name="action_open_quiz"
+                            type="object"
+                            string="Abrir curso"
+                            class="oe_highlight"/>
+                </header>
+
+                <sheet>
+                    <group>
+                        <field name="name" placeholder="Título del curso"/>
+                        <field name="video_url"/>
+                        <field name="pass_score" string="Puntaje mínimo (%)"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Contenido">
+                            <field name="description" widget="html"
+                                   placeholder="Contenido breve del curso..."/>
+                        </page>
+
+                        <page string="Preguntas">
+                            <field name="question_ids">
+                                <list editable="bottom" string="Preguntas">
+                                    <field name="name"/>
+                                    <field name="answer_type"/>
+                                    <field name="option_a"/>
+                                    <field name="option_b"/>
+                                    <field name="option_c"/>
+                                    <field name="option_d"/>
+                                    <field name="correct_single"/>
+                                    <field name="correct_multiple"/>
+                                </list>
+                                <form string="Pregunta">
+                                    <group>
+                                        <field name="name"/>
+                                        <field name="answer_type"/>
+                                        <group string="Opciones">
+                                            <field name="option_a"/>
+                                            <field name="option_b"/>
+                                            <field name="option_c"/>
+                                            <field name="option_d"/>
+                                        </group>
+                                        <field name="correct_single"/>
+                                        <field name="correct_multiple"/>
+                                        <field name="explanation"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+
+                        <page string="Intentos">
+                            <field name="attempt_ids">
+                                <list editable="bottom" string="Intentos">
+                                    <field name="user_id"/>
+                                    <field name="score"/>
+                                    <field name="approved"/>
+                                    <field name="create_date" optional="hide"/>
+                                </list>
+                                <form string="Intento">
+                                    <header>
+                                        <button name="action_fill_all" type="object" string="Preparar preguntas"/>
+                                        <button name="action_validate" type="object" class="btn-primary" string="Calcular puntaje"/>
+                                    </header>
+                                    <sheet>
+                                        <group>
+                                            <field name="user_id"/>
+                                            <field name="score" readonly="1"/>
+                                            <field name="approved" readonly="1"/>
+                                        </group>
+
+                                        <group string="Respuestas">
+                                            <field name="line_ids">
+                                                <list editable="bottom" string="Respuestas">
+                                                    <field name="question_id"/>
+                                                    <field name="answer_single"/>
+                                                    <field name="answer_multiple"/>
+                                                    <field name="answer_open"/>
+                                                    <field name="is_correct" readonly="1"/>
+                                                </list>
+                                            </field>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- =========================
+         ACCIÓN + MENÚ
+         ========================= -->
+    <record id="action_cambios_teo" model="ir.actions.act_window">
+        <field name="name">Cursos TEO (IA)</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">cambios.teo</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_cambios_teo_root"
+              name="Cursos TEO (IA)"
+              parent="menu_retain_call_submenu"
+              action="action_cambios_teo"
+              sequence="40"/>
+
+</odoo>

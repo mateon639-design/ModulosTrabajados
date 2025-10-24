@@ -1,0 +1,13 @@
+<odoo>
+    <data>
+        <record id="ox_supplier_proveedores" model="ir.module.category">
+            <field name="name">Proveedores Portal</field>
+            <field name="description">Modulo Vinculación Proveedores</field>
+            <field name="sequence">200</field>
+        </record>
+        <record id="admin_proveedor" model="res.groups">
+            <field name="name">Admin. Proveedores</field>
+            <field name="category_id" ref="ox_supplier_proveedores"/>
+        </record>
+    </data>
+</odoo>

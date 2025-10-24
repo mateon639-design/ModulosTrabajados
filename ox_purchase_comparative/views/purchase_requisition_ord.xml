@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- purchase.requisition.order action window -->
+        <record id="purchase_requisition_ord_action" model="ir.actions.act_window">
+            <field name="name">Requisicion</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">purchase.requisition.order</field>
+            <field name="view_mode">list,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Crear Nueva Requisicion
+                </p>
+                <p>
+                No se han creado requisiciones!
+                </p>
+            </field>
+        </record>
+
+        <!-- purchase.requisition.order tree view -->
+        <record id="purchase_requisition_ord_view_tree" model="ir.ui.view">
+            <field name="name">purchase.requisition.order.view.tree</field>
+            <field name="model">purchase.requisition.order</field>
+            <field name="arch" type="xml">
+                <list default_order='name desc'>
+                    <field name="name"/>
+                    <field name="date_estimed"/>
+                    <field name="technical_specifications"/>
+                    <field name="amount_total_estimed"/>
+                    <field name="amount_total"/>
+                    <field name="state" widget="badge" decoration-success="state in ('approved', 'done')" decoration-warning="state in ('to_supplier', 'quoted')" decoration-info="state in ('final_approval', 'in_progress')"/>
+                    <field name="department_id"/>
+                    <field name="concept_id"/>
+                    <field name="create_date" string="Fecha solicitud"/>
+                    <field name="create_uid" string="Solicitado por"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- purchase.requisition.order form view -->
+        <record id="purchase_requisition_ord_view_form" model="ir.ui.view">
+            <field name="name">purchase.requisition.order.view.form</field>
+            <field name="model">purchase.requisition.order</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,approved"/>
+                        <button name="action_init_progress" type="object" string="Iniciar" invisible="state != 'draft'" class="btn btn-primary" confirm="Iniciar flujo de aprobación?"/>
+                        <button name="action_send_supplier" type="object" string="Enviar Productos A Cotizar" invisible="state != 'to_quote'" class="btn btn-primary" confirm="Generar las cotizaciones por proveedor?"/>
+                        <button name="action_final_approval" type="object" string="Solicitar Aprobación" invisible="state != 'quoted'" class="btn btn-primary" confirm="Solicitar aprobación final de la requisición?"/>
+                        <button name="action_done" type="object" string="Finalizar" invisible="state != 'approved'" class="btn btn-primary" confirm="Confirma finalización de la requisición?"/>
+                        <button name="action_cancel" type="object" string="Cancelar Requisición" confirm="Cancelar la requisición actual? Recuerde, si desea retomar la requisición tendrá que realizar el proceso de aprobación completo!"/>
+                        
+                    </header>
+                    <sheet>
+                        <div invisible="state != 'to_quote'" class="alert alert-warning" role="alert">
+                            Ingrese los proveedores con los cuales desea realizar la cotización de los productos aprobados!
+                        </div>
+                        <div invisible="state != 'to_supplier'" class="alert alert-success" role="alert">
+                            La requisición se encuentra ofertada, una vez cada proveedor asocie los precios correspondientes, la requisición pasará a solicitud de aprobación final!
+                        </div>
+                        <div invisible="state != 'in_progress'" class="alert alert-success" role="alert">
+                            Esperando aprobación de las líneas de producto!
+                        </div>
+                        
+                        <hr invisible="state not in ('to_quote', 'to_supplier', 'in_progress')" />
+                        <group>
+                            <group>
+                                <field name="date_estimed" readonly="state in ('approved','refused','canceled', 'done')"/>
+                                <field name="department_id" required="1" readonly="state not in ('draft','in_progress','to_quote')"/>
+                                <field name="concept_id" required="1" readonly="state not in ('draft','in_progress','to_quote')"/>
+                            </group>
+                            <group>
+                                <field name="date_limit" readonly="state in ('approved','refused','canceled', 'done')"/>
+                                <field name="create_uid" readonly="1" string="Solicitado por"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="approvers_ids" widget="many2many_tags" domain="[('share', '!=', True)]" readonly="1" force_save="1" invisible="state not in ('draft', 'in_progress', 'to_quote', 'to_supplier')"/>
+                                <field name="other_approvers_ids" widget="many2many_tags" domain="[('share', '!=', True)]" readonly="state != 'quoted'" invisible="state not in ('draft', 'in_progress', 'to_quote', 'to_supplier')"/>
+                                <field name="approvers_order_ids" widget="many2many_tags" domain="[('share', '!=', True)]" readonly="state != 'to_supplier'" invisible="state not in ('final_approval', 'approved')"/>
+                            </group>
+                            <group>
+                                <field name="suppliers_ids" widget="many2many_tags" readonly="state not in ('draft','in_progress','to_quote')" invisible="state in ('draft','in_progress')" />
+                                <field name="amount_total_estimed" readonly="1" force_save="1"/>
+                                <field name="amount_total" readonly="state != 'approved'"/>
+                                <field name="amount_total_confirmed" invisible="state != 'done'"/>
+                                <button name="action_open_wiz_comparative" type="object" class=" form-control inline btn-primary btn-sm fa fa-bar-chart" col="2"/>
+                            </group>
+                        </group>
+                        <br />
+                        <group col="1" class="alert alert-primary" role="alert" string="ANÁLISIS DE COMPRA" invisible="state not in ('quoted','final_approval','approved','done')">
+                            <field colspan="2" name="notes_selection" placeholder="Describa aquí el análisis de la comparación de las cotizaciones..." readonly="state != 'quoted'" nolabel="1"/>
+                        </group>
+                        <hr />
+                        <group col="1">
+                            <field name="requisition_ord_line_ids" col="1" domain="[('requisition_ord_id','=',id)]" readonly="state != 'draft'">
+                                <list editable="bottom" multi_selection="true">
+                                    <field name="product_id" required="1" domain="[('purchase_ok','=',True)]"/>
+                                    <field name="qty"/>
+                                    <field name="coste"/>
+                                    <field name="approvers_ids" widget="many2many_tags" readonly="1"/>
+                                    <field name="approvers_refuse_ids" widget="many2many_tags" readonly="1"/>
+                                    <field name="approvers_especification_ids" widget="many2many_tags" readonly="1"/>
+                                    <field name="notes" column_invisible="1"/>
+                                    <button name="action_open_wiz_event_log" type="object" invisible="not notes" class="btn-primary btn-sm fa fa-eye" help="Log de notas" />
+                                    <button name="action_open_wiz_event" type="object" class="btn-primary btn-sm fa fa-edit" />
+                                </list>
+                            </field>
+                        </group>
+                        <hr />
+                        <group string="Cotizaciones" col="1">
+                            <field name="purchase_ids" col="1" nolabel="1" domain="[('requisition_ord_id','=',id)]" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="amount_total"/>
+                                    <field name="state"/>
+                                    <button name="action_edit_order" type="object" class="btn-primary btn-sm fa fa-edit"/>
+                                </list>
+                            </field>
+                        </group>
+                        <hr />
+                        <group>
+                            <field name="requirement_att" filename="requirement_att_name" widget="binary" readonly="state not in ('draft','in_progress','to_quote')"/>
+                            <field name="requirement_att_name" invisible="1"/>
+                            <field name="technical_specifications" widget="html" readonly="state not in ('draft','in_progress','to_quote')"/>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+
+    </data>
+</odoo>

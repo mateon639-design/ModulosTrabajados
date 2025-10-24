@@ -1,0 +1,123 @@
+<odoo>
+    <data>
+        <!-- res.partner.supplier action window -->
+        <record id="res_partner_supplier_action" model="ir.actions.act_window">
+            <field name="name">Vinculación de Proveedores</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.partner.supplier</field>
+            <field name="view_mode">list,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Crear Nueva Vinculación Proveedor
+                </p>
+                <p>
+                    No hay vinculaciones activas de proveedor!
+                </p>
+            </field>
+        </record>
+
+        <!-- res.partner.supplier list view -->
+        <record id="res_partner_supplier_view_list" model="ir.ui.view">
+            <field name="name">res.partner.supplier.view.list</field>
+            <field name="model">res.partner.supplier</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="partner_id"/>
+                    <field name="approbal_uid"/>
+                    <field name="date_approval"/>
+                    <field name="progress_status" string="% Registro"/>
+                    <field name="state"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- res.partner.supplier form view -->
+        <record id="res_partner_supplier_view_form" model="ir.ui.view">
+            <field name="name">res.partner.supplier.view.form</field>
+            <field name="model">res.partner.supplier</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible="pre_registered,pre_validate,done,refused"/>
+                        <button name="action_done" type="object" string="Aprobar" modifiers="{'visible': [('state', 'in', ['pre_validate','requires_specifications'])]}" class="btn-success" confirm="Esta seguro de aprobar el proveedor?" groups="ox_supplier_portal.admin_proveedor"/>
+                        <button name="action_requires_specifications" type="object" string="Requiere Especificaciones" modifiers="{'visible': [('state', '=', 'pre_validate')]}" class="btn-info" confirm="Esta seguro de solicitar especificaciones al aproveedor?" groups="ox_supplier_portal.admin_proveedor"/>
+                        <button name="action_refuse" type="object" string="Rechazar" modifiers="{'visible': [('state', 'in', ['pre_validate','requires_specifications'])]}" class="btn-danger" confirm="Esta seguro de rechazar al proveedor?" groups="ox_supplier_portal.admin_proveedor"/>
+                        <button name="action_restart" type="object" string="Reiniciar" modifiers="{'visible': [('state', 'in', ['done','refused'])]}" class="btn-danger" confirm="Esta seguro de reiniciar la vinculación de proveedor?" groups="ox_supplier_portal.admin_proveedor"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="partner_id" readonly="1"/>
+                                <field name="progress_status" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="date_approval" readonly="1"/>
+                                <field name="approbal_uid" readonly="1"/>
+                            </group>
+                        </group>
+                        <hr />
+                        <group>
+                            <group>
+                                <field name="info_proveedor" class="oe_inline" readonly="1"/>
+                                <field name="info_tributaria" class="oe_inline" readonly="1"/>
+                                <field name="info_metodo_pago" class="oe_inline" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="info_referencias" class="oe_inline" readonly="1"/>
+                                <field name="info_requisitos" class="oe_inline" readonly="1"/>
+                                <field name="info_politicas" class="oe_inline" readonly="1"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="line_ids">
+                                <list editable="bottom" create="false" delete="false">
+                                    <field name="requirement_id" readonly="1"/>
+                                    <field name="req_optional" readonly="1"/>
+                                    <field name="attach" readonly="1" filename="attach_name" widget="binary"/>
+                                    <field name="attach_name" invisible="1"/>
+                                    <field name="note" readonly="1"/>
+                                    <field name="completed" readonly="1"/>
+                                </list>
+                            </field>
+                        </group>
+                        <group>
+                            <field name="note" modifiers="{'readonly': [('state','!=','pre_validate')]}"/>
+                        </group>
+                        <notebook>
+                            <page string="Contratos / Convenios" name="page_contract_supplier">
+                                <field name="contract_ids" nolabel="1">
+                                    <list>
+                                        <field name="date_start"/>
+                                        <field name="date_end"/>
+                                        <field name="date_renew"/>
+                                        <field name="description"/>
+                                    </list>
+                                    <form>
+                                        <group>
+                                            <group>
+                                                <field name="date_start"/>
+                                                <field name="date_renew"/>
+                                            </group>
+                                            <group>
+                                                <field name="date_end"/>
+                                            </group>
+                                        </group>
+                                        <group col="2">
+                                            <field name="description" colspan="2"/>
+                                        </group>
+                                    </form>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+        
+    </data>
+</odoo>

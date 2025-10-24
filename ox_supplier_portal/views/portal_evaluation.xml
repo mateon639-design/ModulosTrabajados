@@ -1,0 +1,115 @@
+<odoo>
+    <data>
+
+        <template id="account.portal_my_home_invoice" name="Show Invoices &amp; Bills" inherit_id="portal.portal_my_home" customize_show="True" priority="100">
+            <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+                <t t-call="portal.portal_docs_entry">
+                    <t t-set="title">-</t>
+                    <t t-set="url" t-value="'/my'"/>
+                    <t t-set="placeholder_count" t-value="'0'"/>
+                </t>
+            </xpath>
+        </template>
+
+        <template id="portal_breadcrumbs_evaluation" inherit_id="portal.portal_breadcrumbs">
+            <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+                <li t-if="page_name == 'supplier_eval_page'" class="breadcrumb-item">
+                    <span style="color:#6C757D;">Evaluaciones</span>
+                </li>
+            </xpath>
+        </template>
+
+        <template id="supplier_eval" name="Supplier Evaluation" inherit_id="portal.portal_my_home" priority="30">
+            <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+                <t t-call="portal.portal_docs_entry">
+                    <t t-set="title">Evaluaciones</t>
+                    <t t-set="url" t-value="'/my/supplier/evaluation'"/>
+                    <t t-set="placeholder_count" t-value="'supplier_eval_count'"/>
+                </t>
+            </xpath>
+        </template>
+
+        <template id="portal_supplier_eval" name="Evaluaciones Proveedor">
+            <t t-call="portal.portal_layout">
+                <div id="wrap" class="oe_structure oe_empty">
+                    <section class="s_three_columns o_cc o_cc2 pt32 pb32 o_colored_level" data-vcss="001" data-snippet="s_three_columns" data-name="Columnas" style="background-image: none;">
+                        <div class="container">
+                            <div class="row d-flex o_grid_mode" data-row-count="26">
+                                <div class="s_col_no_bgcolor o_grid_item g-height-26 g-col-lg-12 col-lg-12" style="grid-area: 1 / 1 / 15 / 15; z-index: 1;">
+                                    <div class="card text-bg-white h-100">
+
+                                        <div class="card-body" t-if="page_name == 'supplier_eval_page'">
+                                            <h3 class="card-title o_default_snippet_text">Evaluaciones Proveedor</h3>
+                                            <p class="card-text o_default_snippet_text">
+                                                <br/>
+                                            </p>
+                                            <div>
+                                                <section class="s_website_form_course pt16 pb16" data-vcss="001" data-snippet="s_website_form_course" data-name="Formulario">
+
+                                                    <div class="container">
+
+                                                        <div class="row">
+                                                            <div class="col-auto col-sm">
+                                                                <strong>Código</strong>
+                                                            </div>
+                                                            <div class="col-auto col-sm">
+                                                                <strong>Periodo Evaluado</strong>
+                                                            </div>
+                                                            <div class="col-auto col-sm">
+                                                                <strong>Fecha Evaluación</strong>
+                                                            </div>
+                                                            <div class="col-auto col-sm">
+                                                                <strong>Calificación</strong>
+                                                            </div>
+                                                            <div class="col-auto col-sm">
+                                                                <strong>Evaluación</strong>
+                                                            </div>
+                                                            <div class="col-auto col-sm">
+                                                            </div>
+                                                        </div>
+                                                        <br />
+
+                                                        <t t-foreach="evaluations" t-as="ev">
+
+                                                            <div class="row">
+                                                                <div class="col-auto col-sm">
+                                                                    <strong t-esc="ev['code']" />
+                                                                </div>
+                                                                <div class="col-auto col-sm">
+                                                                    <span t-esc="ev['period']" />
+                                                                </div>
+                                                                <div class="col-auto col-sm">
+                                                                    <span t-esc="ev['date']" />
+                                                                </div>
+                                                                <div class="col-auto col-sm">
+                                                                    <span t-esc="ev['calification']" />
+                                                                </div>
+                                                                <div class="col-auto col-sm">
+                                                                    <span t-esc="ev['supplier_eval']" />
+                                                                </div>
+                                                                <div class="col-auto col-sm">
+                                                                    <a target="blank" t-att-href="ev['url']">
+                                                                        <button type="button" class="btn btn-primary btn-md o_website_form_send">Descargar</button>
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+
+                                                        </t>
+
+                                                    </div>
+
+                                                </section>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </t>
+        </template>
+
+    </data>
+</odoo>

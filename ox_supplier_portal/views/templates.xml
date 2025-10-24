@@ -1,0 +1,47 @@
+<odoo>
+    <data noupdate="1">
+      <record id="supplier_register_status_approval_template" model="mail.template">
+            <field name="name">Update Status Supplier: Send by email</field>
+            <field name="model_id" ref="ox_supplier_portal.model_res_partner_supplier"/>
+            <field name="subject">Bienvenido a Indeseg Ltda!</field>
+            <field name="email_from">{{object.company_id.email}}</field>
+            <field name="partner_to">{{object.partner_id.id}}</field>
+            <field name="body_html" type="html">
+                <p>Estimado/a <t t-out="object.partner_id.name or ''" />,</p>
+                <p>
+                    Nos complace informarle que su registro como proveedor ha sido aprobada, y estamos muy emocionados de darle la bienvenida.<br /><br /> 
+                    Valoramos su compromiso y la calidad de los servicios que ofrece, y estamos ansiosos por comenzar a trabajar juntos.<br /><br />
+                    Una vez más, bienvenido a bordo. Estamos seguros de que esta colaboración será beneficiosa para ambas partes.<br /><br /><br />
+                    
+                    Saludos cordiales,
+                </p>
+                <p>
+                    ____________________________<br />
+                    <t t-out="object.approbal_uid.partner_id.name or ''" />
+                </p>                
+            </field>
+        </record>
+
+        <record id="supplier_register_portal_manual_template" model="mail.template">
+            <field name="name">Access Portal Supplier: Send by email</field>
+            <field name="model_id" ref="ox_supplier_portal.model_res_partner_supplier"/>
+            <field name="subject">Bienvenido al portal Indeseg Ltda!</field>
+            <field name="email_from">{{object.company_id.email}}</field>
+            <field name="partner_to">{{object.partner_id.id}}</field>
+            <field name="body_html" type="html">
+                <p>Estimado/a <t t-out="object.partner_id.name or ''" />,</p>
+                <p>
+                    Hemos renovado para ti!.<br /><br /> 
+                    Accede a nuestro portal ingresando al siguiente link <a href="www.indeseg.edu.co/my/supplier">PORTAL INDESEG</a>, con tu usuario y contraseña (NIT sin dígito de verificación).<br /><br />
+                    Una vez más, bienvenido a bordo. Estamos seguros de que esta colaboración será beneficiosa para ambas partes.<br /><br /><br />
+                    
+                    Saludos cordiales,
+                </p>
+                <p>
+                    ____________________________<br />
+                    <t t-out="object.approbal_uid.partner_id.name or ''" />
+                </p>                
+            </field>
+        </record>
+    </data>
+</odoo>

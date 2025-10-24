@@ -1,0 +1,51 @@
+<odoo>
+    <data>
+        <!-- res.partner inherit form view -->
+        <record id="res_partner_inherit_portal_supplier" model="ir.ui.view">
+            <field name="name">res.partner.inherit.view.form</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="ox_res_partner_ext_co.view_partner_form_inherit"/>
+            <field name="arch" type="xml">
+                
+                
+                <field name="profesion_id" position="after">
+                    <field name="retencion"/>
+                </field>
+                
+                <xpath expr="//page[@name='internal_notes']" position="after">
+                    <page name="portal_supplier" string="Portal Proveedor">
+                        <group>
+                            <group>
+                                <field name="supplier_status"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="link_up_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="state"/>
+                                    <field name="date_approval"/>
+                                    <field name="approbal_uid"/>
+                                </list>
+                            </field>
+                        </group>
+                    </page>
+                </xpath>
+
+            </field>
+        </record>
+
+        <!-- res.partner action server -->
+        <record id="action_send_mail_supplier_register" model="ir.actions.server">
+            <field name="name">Otorgar Acceso Portal Proveedor</field>
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="binding_model_id" ref="base.model_res_partner" />
+            <field name="binding_view_types">list,form</field>
+            <field name="state">code</field>
+            <field name="code">
+                for n in records:
+                    n.action_send_mail_supplier_register()
+            </field>
+        </record>
+    </data>
+</odoo>

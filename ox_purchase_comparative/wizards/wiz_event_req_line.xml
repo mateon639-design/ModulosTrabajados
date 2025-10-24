@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- wiz.purchase.requisition.order.line form view -->
+        <record id="wiz_purchase_requisition_order_line_view_form" model="ir.ui.view">
+            <field name="name">wiz.purchase.requisition.order.line.view.form</field>
+            <field name="model">wiz.purchase.requisition.order.line</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <group>
+                        <group>
+                            <field name="state"/>
+                        </group>
+                        <group>
+                            <field name="remove_event_prev"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note"/>
+                    </group>
+                    <footer>
+                        <button name="action_apply" type="object" string="Aplicar"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+    </data>
+</odoo>

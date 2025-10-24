@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Acción planificada para sincronizar historial Retell diariamente -->
+    <!-- Ejecutar sincronización a las 8:00, 10:00, 12:00, 14:00, 16:00, 18:00 -->
+    <record id="cron_sync_retell_history_8" model="ir.cron">
+        <field name="name">Sincronizar Historial 8:00</field>
+        <field name="model_id" ref="model_retain_call_history"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sincronizar_historial()</field>
+        <field name="interval_number">2</field>
+        <field name="interval_type">hours</field>
+        <field name="active" eval="True"/>
+        <field name="nextcall" eval="(DateTime.now()).replace(hour=8, minute=0, second=0, microsecond=0)"/>
+        <field name="priority">5</field>
+        <field name="user_id" ref="base.user_root"/>
+    </record>
+    <record id="cron_sync_retell_history_10" model="ir.cron">
+        <field name="name">Sincronizar Historial 10:00</field>
+        <field name="model_id" ref="model_retain_call_history"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sincronizar_historial()</field>
+        <field name="interval_number">2</field>
+        <field name="interval_type">hours</field>
+        <field name="active" eval="True"/>
+        <field name="nextcall" eval="(DateTime.now()).replace(hour=10, minute=0, second=0, microsecond=0)"/>
+        <field name="priority">5</field>
+        <field name="user_id" ref="base.user_root"/>
+    </record>
+    <record id="cron_sync_retell_history_12" model="ir.cron">
+        <field name="name">Sincronizar Historial 12:00</field>
+        <field name="model_id" ref="model_retain_call_history"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sincronizar_historial()</field>
+        <field name="interval_number">2</field>
+        <field name="interval_type">hours</field>
+        <field name="active" eval="True"/>
+        <field name="nextcall" eval="(DateTime.now()).replace(hour=12, minute=0, second=0, microsecond=0)"/>
+        <field name="priority">5</field>
+        <field name="user_id" ref="base.user_root"/>
+    </record>
+    <record id="cron_sync_retell_history_14" model="ir.cron">
+        <field name="name">Sincronizar Historial 14:00</field>
+        <field name="model_id" ref="model_retain_call_history"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sincronizar_historial()</field>
+        <field name="interval_number">2</field>
+        <field name="interval_type">hours</field>
+        <field name="active" eval="True"/>
+        <field name="nextcall" eval="(DateTime.now()).replace(hour=14, minute=0, second=0, microsecond=0)"/>
+        <field name="priority">5</field>
+        <field name="user_id" ref="base.user_root"/>
+    </record>
+    <record id="cron_sync_retell_history_16" model="ir.cron">
+        <field name="name">Sincronizar Historial 16:00</field>
+        <field name="model_id" ref="model_retain_call_history"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sincronizar_historial()</field>
+        <field name="interval_number">2</field>
+        <field name="interval_type">hours</field>
+        <field name="active" eval="True"/>
+        <field name="nextcall" eval="(DateTime.now()).replace(hour=16, minute=0, second=0, microsecond=0)"/>
+        <field name="priority">5</field>
+        <field name="user_id" ref="base.user_root"/>
+    </record>
+    <record id="cron_sync_retell_history_18" model="ir.cron">
+        <field name="name">Sincronizar Historial 18:00</field>
+        <field name="model_id" ref="model_retain_call_history"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sincronizar_historial()</field>
+        <field name="interval_number">2</field>
+        <field name="interval_type">hours</field>
+        <field name="active" eval="True"/>
+        <field name="nextcall" eval="(DateTime.now()).replace(hour=18, minute=0, second=0, microsecond=0)"/>
+        <field name="priority">5</field>
+        <field name="user_id" ref="base.user_root"/>
+    </record>
+</odoo>

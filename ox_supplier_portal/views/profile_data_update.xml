@@ -1,0 +1,278 @@
+<odoo>
+    <data>
+        <template id="profile_data_update" name="Preinscripcion Curso">
+            <t t-call="website.layout">
+                <div id="wrap" class="oe_structure oe_empty">
+                    <section class="s_title o_colored_level pb0 pt0" data-vcss="001" data-snippet="s_title" data-name="Título" style="background-image: none;">
+                        <div class="s_allow_columns container">
+                            <div class="row">
+                                <div class="o_colored_level pt0 col-lg-12">
+                                    <p style="text-align: center;">
+                                        <font style="font-size: 62px;" class="o_default_snippet_text">
+                                            <span style="font-size: 24px;">
+                                                <strong>Actualización de Datos</strong>
+                                            </span>
+                                        </font>
+                                        <br/>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="s_text_block o_colored_level pt0 pb0" data-snippet="s_text_block" data-name="Texto" style="background-image: none;">
+                        <div class="s_allow_columns container">
+                            <div class="row o_grid_mode" data-row-count="4">
+                                <div class="o_colored_level o_grid_item g-col-lg-12 g-height-4 col-lg-12 border" style="grid-area: 1 / 1 / 3 / 13; z-index: 1;">
+                                    <p class="o_default_snippet_text" style="margin-bottom: 0px; text-align: justify;">
+                                        Al diligenciar el siguiente formulario, autorizo el tratamiento de mis datos personales a lorem ipsum LTDA. de acuerdo con su politica de tratamiento de información.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="s_faq_collapse pt32 pb32 o_colored_level" data-snippet="s_faq_collapse" data-name="Acordeón" style="background-image: none; position: relative;">
+                        <div class="container">
+                            <div id="myCollapse" class="accordion" role="tablist">
+                                <div class="card" data-name="Item">
+                                    <a href="#" role="tab" data-bs-toggle="collapse" aria-expanded="true" class="card-header o_default_snippet_text" style="color: #505050" data-bs-target="#myCollapseTab1">Información Básica</a>
+                                    <div data-bs-parent="#myCollapse" role="tabpanel" class="collapse show" id="myCollapseTab1">
+                                        <div class="card-body">
+                                            <section class="s_website_form_course pt16 pb16" data-vcss="001" data-snippet="s_website_form_course" data-name="Formulario">
+                                                <div class="container">
+                                                    <p>
+                                                        Complete las secciones del presente formulario y una vez finalizado y validado el proceso, recibirá un correo electrónico con la confirmación de su <strong>Preinscripción</strong>. 
+                                                    </p>
+                                                    <form id="frp1" action="" data-force_action="/my/course/register" method="post" enctype="multipart/form-data" class="o_mark_required" data-mark="*">
+                                                        <div class="s_website_form_rows row s_col_no_bgcolor">
+
+                                                            <div class="s_website_form_field mb-3 col-12" data-type="email" data-name="Field">
+                                                                <div class="row s_col_no_resize s_col_no_bgcolor">
+                                                                    <label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px">
+                                                                        <span class="s_website_form_label_content">Ultima actualización</span>
+                                                                    </label>
+                                                                    <div class="col-sm">
+                                                                        <input type="text" disabled="disabled" class="form-control s_website_form_input disabled" name="partner_last_update" t-att-value="partner_last_update"/>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="s_website_form_field mb-3 col-12" data-type="selection" data-name="Field">
+                                                                <div class="row s_col_no_resize s_col_no_bgcolor">
+                                                                    <label class="col-sm-auto s_website_form_label" style="width: 200px;">
+                                                                        <span class="s_website_form_label_content">Tipo de compañía</span>
+                                                                    </label>
+                                                                    <div class="col-sm">
+                                                                        <div class="row s_col_no_resize s_col_no_bgcolor s_website_form_multiple" data-name="company_type" data-display="horizontal">
+                                                                            <div class="radio col-12 col-lg-4 col-md-6">
+                                                                                <div class="form-check">
+                                                                                    <input type="radio" disabled="disabled" class="s_website_form_input form-check-input" name="company_type" value="person" t-att-checked="'checked' if company_type == 'person' else None" />
+                                                                                    <label class="form-check-label s_website_form_check_label">Individual</label>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="radio col-12 col-lg-4 col-md-6">
+                                                                                <div class="form-check">
+                                                                                    <input type="radio" disabled="disabled" class="s_website_form_input form-check-input" name="company_type" value="company" t-att-checked="'checked' if company_type == 'company' else None"/>
+                                                                                    <label class="form-check-label s_website_form_check_label">Compañía</label>
+                                                                                    <input type="hidden" name="frp" value="1"/>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="s_website_form_field mb-3 col-12" data-type="many2one" data-name="Field">
+                                                                <div class="row s_col_no_resize s_col_no_bgcolor">
+                                                                    <label class="col-form-label col-sm-4 s_website_form_label " style="width: 200px">
+                                                                        <span class="s_website_form_label_content">Tipo / Número Identificación</span>
+                                                                    </label>
+                                                                    <div class="col-sm-4">
+                                                                        <select class="form-select s_website_form_input" name="l10n_latam_identification_type_id" disabled="disabled">
+                                                                            <option value="0" t-att-selected="'selected' if l10n_latam_identification_type_id not in (4, 5, 9) else None">-- Seleccionar -- </option>
+                                                                            <option value="4" t-att-selected="'selected' if l10n_latam_identification_type_id == 4 else None">NIT</option>
+                                                                            <option value="5" t-att-selected="'selected' if l10n_latam_identification_type_id == 5 else None">Cédula de ciudadanía</option>
+                                                                            <option value="9" t-att-selected="'selected' if l10n_latam_identification_type_id == 9 else None">Cédula de extranjería</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-sm-4">
+                                                                        <input type="text" class="form-control s_website_form_input" name="partner_ref_contact" required="true" placeholder="" id="ok88atbwe5ml" t-att-value="partner_ref_contact" disabled="disabled"/>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="s_website_form_field mb-3 col-12" data-type="char" data-name="Field">
+                                                                <div class="row s_col_no_resize s_col_no_bgcolor">
+                                                                    <label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px;">
+                                                                        <span class="s_website_form_label_content">Razón Social</span>
+                                                                        <span class="s_website_form_mark">*</span>
+                                                                    </label>
+                                                                    <div class="col-sm">
+                                                                        <input type="text" class="form-control s_website_form_input" name="partner_name" required="true" placeholder="" t-att-value="partner_name" disabled="disabled"/>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="s_website_form_field mb-3 col-12" data-type="email" data-name="Field">
+                                                                <div class="row s_col_no_resize s_col_no_bgcolor">
+                                                                    <label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px">
+                                                                        <span class="s_website_form_label_content">Correo electrónico</span>
+                                                                        <span class="s_website_form_mark">*</span>
+                                                                    </label>
+                                                                    <div class="col-sm">
+                                                                        <input type="email" class="form-control s_website_form_input disabled" name="partner_email" required="1" placeholder="" t-att-value="partner_email"/>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Pais / Depto / Ciudad -->
+                                                            <div class="s_website_form_field mb-3 col-12" data-type="many2one" data-name="Field">
+                                                                <div class="row s_col_no_resize s_col_no_bgcolor">
+                                                                    <label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+                                                                        <span class="s_website_form_label_content">País / Depto / Ciudad</span>
+                                                                    </label>
+                                                                    <div class="col-sm">
+                                                                        <select class="form-select s_website_form_input" name="country_id">
+                                                                            <option value="49" selected="selected">Colombia</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-sm">
+                                                                        <select class="form-select s_website_form_input" name="state_id" required="true">
+                                                                            <option value="0" selected="selected">-- Seleccionar --</option>
+                                                                            <t t-foreach="country_states" t-as="state_id">
+                                                                                <option t-att-value="state_id.id" t-att-selected="partner_state_id if partner_state_id == state_id.id else None">
+                                                                                    <t t-out="state_id.name" />
+                                                                                </option>
+                                                                            </t>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-sm">
+                                                                        <select class="form-select s_website_form_input" name="city_id" required="true">
+                                                                            <option value="0" selected="selected">-- Seleccionar --</option>
+                                                                            <t t-foreach="city_states" t-as="city_id">
+                                                                                <option t-att-value="city_id.id" t-att-selected="partner_city_id if partner_city_id == city_id.id else None">
+                                                                                    <t t-out="city_id.name" />
+                                                                                </option>
+                                                                            </t>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="s_website_form_field mb-3 col-12" data-type="char" data-name="Field">
+                                                                <div class="row s_col_no_resize s_col_no_bgcolor">
+                                                                    <label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px;">
+                                                                        <span class="s_website_form_label_content">Dirección</span>
+                                                                    </label>
+                                                                    <div class="col-sm">
+                                                                        <input type="text" class="form-control s_website_form_input" name="partner_street" value="" placeholder="" t-att-value="partner_street" required="true"/>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="s_website_form_field mb-3 col-12" data-type="tel" data-name="Field">
+                                                                <div class="row s_col_no_resize s_col_no_bgcolor">
+                                                                    <label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px;">
+                                                                        <span class="s_website_form_label_content">Celular</span>
+                                                                    </label>
+                                                                    <div class="col-sm">
+                                                                        <input type="tel" class="form-control s_website_form_input" name="partner_mobile" t-att-value="partner_mobile" required="true"/>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div t-if="company_type != 'person'" class="s_website_form_field mb-3 col-12" data-type="char" data-name="Field">
+                                                                <div class="row s_col_no_resize s_col_no_bgcolor">
+                                                                    <label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+                                                                        <span class="s_website_form_label_content">Sitio Web</span>
+                                                                    </label>
+                                                                    <div class="col-sm">
+                                                                        <input type="text" class="form-control s_website_form_input" name="partner_web" value="" placeholder="" t-att-value="partner_web"/>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="s_website_form_field mb-3 col-12" data-type="char" data-name="Field">
+                                                                <div class="row s_col_no_resize s_col_no_bgcolor">
+                                                                    <label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+                                                                        <span class="s_website_form_label_content">Imagen (Logo / Foto perfíl) [150 x 150]</span>
+                                                                    </label>
+                                                                    <div class="col-sm">
+                                                                        <input type="file" class="form-control s_website_form_input file" name="partner_image"/>
+                                                                    </div>
+                                                                    <div class="col-sm">
+                                                                        <img t-if="partner_image_val" t-attf-src="data:image/jpg;base64,{{partner_image_val}}" style="width:150px;height:150px" />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <br /><br />
+                                                            <hr />
+                                                            <div t-if="company_type != 'person'" class="s_website_form_field mb-3 col-12" data-type="char" data-name="Field">
+                                                                <div class="row s_col_no_resize s_col_no_bgcolor">
+                                                                    <label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+                                                                        <span class="s_website_form_label_content">Representante Legal</span>
+                                                                    </label>
+                                                                    <div class="col-sm">
+                                                                        <input type="text" class="form-control s_website_form_input" name="rep_leg_name" t-att-value="rep_leg_name" placeholder="" required="true"/>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div t-if="company_type != 'person'" class="s_website_form_field mb-3 col-12" data-type="many2one" data-name="Field">
+                                                                <div class="row s_col_no_resize s_col_no_bgcolor">
+                                                                    <label class="col-form-label col-sm-4 s_website_form_label " style="width: 200px">
+                                                                        <span class="s_website_form_label_content">Tipo / Número Identificación</span>
+                                                                    </label>
+                                                                    <div class="col-sm-4">
+                                                                        <select class="form-select s_website_form_input" name="rep_leg_identification_type_id">
+                                                                            <option value="0" t-att-selected="'selected' if rep_leg_identification_type_id not in (5, 9) else None">-- Seleccionar -- </option>
+                                                                            <option value="5" t-att-selected="'selected' if rep_leg_identification_type_id == 5 else None">Cédula de ciudadanía</option>
+                                                                            <option value="9" t-att-selected="'selected' if rep_leg_identification_type_id == 9 else None">Cédula de extranjería</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-sm-4">
+                                                                        <input type="text" class="form-control s_website_form_input" name="rep_leg_ref" required="true" placeholder="" t-att-value="rep_leg_ref"/>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div t-if="company_type != 'person'" class="s_website_form_field mb-3 col-12" data-type="char" data-name="Field">
+                                                                <div class="row s_col_no_resize s_col_no_bgcolor">
+                                                                    <label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+                                                                        <span class="s_website_form_label_content">Correo electrónico</span>
+                                                                    </label>
+                                                                    <div class="col-sm">
+                                                                        <input type="text" class="form-control s_website_form_input" name="rep_leg_email" t-att-value="rep_leg_email" placeholder="" required="true"/>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div t-if="company_type != 'person'" class="s_website_form_field mb-3 col-12" data-type="char" data-name="Field">
+                                                                <div class="row s_col_no_resize s_col_no_bgcolor">
+                                                                    <label class="col-form-label col-sm-auto s_website_form_label " style="width: 200px">
+                                                                        <span class="s_website_form_label_content">Celular</span>
+                                                                    </label>
+                                                                    <div class="col-sm">
+                                                                        <input type="text" class="form-control s_website_form_input" name="rep_leg_mobile" t-att-value="rep_leg_mobile" placeholder="" />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mb-0 py-2 col-12 s_website_form_submit" data-name="Submit Button">
+                                                                <div style="width: 200px;" class="s_website_form_label"/>
+                                                                <a href="#" id="btn-frp1-submit" role="button" class="btn btn-primary btn-lg s_website_form_send_course o_default_snippet_text" data-bs-original-title="" title="">Actualizar</a>
+                                                                <span id="s_website_form_result"/>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </section>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="text-center">
+                                <a t-attf-href="/my" class="btn btn-secondary">Regresar Al Inicio</a>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </t>
+        </template>
+
+
+    </data>
+</odoo>

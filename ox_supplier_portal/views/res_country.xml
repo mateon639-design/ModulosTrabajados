@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+        <!-- res.country inherit form view -->
+        <record id="res_country_inherit" model="ir.ui.view">
+            <field name="name">res.country.inherit.view.form</field>
+            <field name="model">res.country</field>
+            <field name="inherit_id" ref="base.view_country_form"/>
+            <field name="arch" type="xml">
+                <field name="code" position="after">
+                    <field name="web_enable_update_info"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>

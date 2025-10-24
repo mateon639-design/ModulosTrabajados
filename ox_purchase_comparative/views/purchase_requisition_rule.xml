@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- purchase.requisition.order.rule action window -->
+        <record id="purchase_requisition_order_rule_action" model="ir.actions.act_window">
+            <field name="name">Reglas de requisiciones</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">purchase.requisition.order.rule</field>
+            <field name="view_mode">list,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Crear Regla
+                </p><p>
+                    No se han creado reglas de aprobación!
+                </p>
+            </field>
+        </record>
+
+
+        <!-- purchase.requisition.order.rule tree view -->
+        <record id="purchase_requisition_order_rule_view_tree" model="ir.ui.view">
+            <field name="name">purchase.requisition.order.rule.view.tree</field>
+            <field name="model">purchase.requisition.order.rule</field>
+            <field name="arch" type="xml">
+                <list editable="bottom" default_order="department_id asc, concept_id asc, amount asc">
+                    <field name="department_id" required="1"/>
+                    <field name="concept_id" required="1"/>
+                    <field name="amount"/>
+                    <field name="active"/>
+                    <field name="approvers_ids" widget="many2many_tags"/>
+                </list>
+            </field>
+        </record>
+
+
+    </data>
+</odoo>

@@ -1,0 +1,39 @@
+<odoo>
+  <data>
+    <record id="purchase_requisition_event_template" model="mail.template">
+      <field name="name">Requisición: Notificación de evento</field>
+      <field name="model_id" ref="ox_purchase_comparative.model_purchase_requisition_order"/>
+      <field name="subject">Solicitud de evento - Requisición {{object.name}}</field>
+      <field name="email_from">notificaciones@indeseg.edu.co</field>
+      <field name="partner_to">{{object._get_event_mails()}}</field>
+      <field name="body_html" type="html">
+        <p>
+          Tiene una solicitud de evento sobre la requisición referenciada en el asunto, ingrese al requisiciones para ver mas detalles!
+        </p>
+      </field>
+    </record>
+
+    <record id="purchase_order_supplier_template" model="mail.template">
+      <field name="name">Cotización: Solicitud a proveedor</field>
+      <field name="model_id" ref="purchase.model_purchase_order"/>
+      <field name="subject">Nueva Solicitud de Cotización {{object.name}}</field>
+      <field name="email_from">notificaciones@indeseg.edu.co</field>
+      <field name="partner_to">{{object.partner_id.id}}</field>
+      <field name="body_html" type="html">
+        <p>
+          Estimado Proveedor, <br /> <br />
+
+          Esperamos que este mensaje le encuentre bien. <br /> <br /> 
+
+          A través del presente, queremos informarle que hemos generado una nueva solicitud de cotización por favor ingrese al portal para conocer el detalle. <br /> <br />
+
+          Agradecemos nos envíe su propuesta para ello, puede realizarlo en el portal de proveedores. <br /> <br />
+
+          <a target="_blank" href="https://indeseg.edu.co/proveedores">https://indeseg.edu.co/proveedores</a><br /><br />
+
+          Esperamos contar con su oferta a la mayor brevedad posible.
+        </p>
+      </field>
+    </record>
+  </data>
+</odoo>

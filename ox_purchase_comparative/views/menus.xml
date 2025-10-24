@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+        <menuitem id="purchase_requisition_ord_menu_act" name="Requisiciones" parent="purchase.menu_purchase_root" sequence="1"/>
+
+        <menuitem id="purchase_requisition_ord_menu" name="Requisiciones" parent="purchase_requisition_ord_menu_act" action="purchase_requisition_ord_action" sequence="100"/>
+
+        <menuitem id="purchase_requisition_ord_rule_menu" name="Reglas de aprobación" parent="purchase_requisition_ord_menu_act" action="purchase_requisition_order_rule_action" sequence="300"/>
+
+        <menuitem id="purchase_requisition_ord_concept_menu" name="Conceptos de aprobación" parent="purchase_requisition_ord_menu_act" action="purchase_requisition_order_concept_action" sequence="400"/>
+
+    </data>
+
+</odoo>

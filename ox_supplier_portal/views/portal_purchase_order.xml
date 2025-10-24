@@ -1,0 +1,239 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+
+        <template id="purchase.purchase_order_portal_content" name="Purchase Order Portal Content">
+            <!-- Intro -->
+            <div id="introduction" t-attf-class="pb-2 pt-3 #{'card-header bg-white' if report_type == 'html' else ''}">
+                <h2 class="my-0">
+                    <t t-if="order.state in ['draft', 'sent', 'to approve']">Request for Quotation</t><t t-else="1">Purchase Order</t><span t-esc="order.name" class="text-primary" style="margin-left:20px;"/>
+                </h2>
+            </div>
+
+            <div t-attf-class="#{'card-body' if report_type == 'html' else ''}">
+                <!-- Informations -->
+                <div id="informations">
+                    <div class="row" id="po_date">
+                        <div class="mb-3 col-6">
+                            <t t-if="order.state in ['draft', 'sent', 'to approve']">
+                                <strong>Fecha límite para cotizar:</strong>
+                            </t>
+                            <t t-if="order.state in ['purchase', 'done', 'cancel']">
+                                <strong>Order Date:</strong>
+                            </t>
+                            <span t-field="order.date_order" t-options='{"widget": "date"}'/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <strong class="d-block mb-1">Cliente:</strong>
+                            <address t-field="order.company_id.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
+                            <!--<strong>Confirmation Date:</strong> <span t-field="order.date_approve" t-options='{"widget": "date"}'/><br/>
+                            <div t-att-class="'d-inline' if order.date_planned else 'd-none'">
+                            <strong>Receipt Date:</strong><span class="ms-1" t-field="order.date_planned" t-options='{"widget": "date"}'/>
+                            </div>-->
+                        </div>
+                    </div>
+
+                    <t t-set="invoices" t-value="[i for i in order.invoice_ids if i.state not in ['draft', 'cancel', 'sent']]"/>
+                    <div t-if="invoices" class="row">
+                        <div class="col">
+                            <strong class="d-block mb-1">Invoices</strong>
+                            <ul class="list-group mb-4">
+                                <t t-foreach="invoices" t-as="i">
+                                    <t t-set="report_url" t-value="i.get_portal_url(report_type='pdf', download=True)"/>
+                                    <div class="d-flex flex-wrap align-items-center justify-content-between">
+                                        <div>
+                                            <a t-att-href="report_url">
+                                                <span t-esc="i.name"/>
+                                            </a>
+                                            <div class="small d-lg-inline-block">Date: <span class="text-muted" t-field="i.invoice_date"/></div>
+                                        </div>
+                                        <span t-if="i.payment_state in ('paid', 'in_payment')" class="small badge text-bg-success"><i class="fa fa-fw fa-check"/> <b>Paid</b></span>
+                                        <span t-else="" class="small badge text-bg-info"><i class="fa fa-fw fa-clock-o"/> <b>Waiting Payment</b></span>
+                                    </div>
+                                </t>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <section id="details" style="page-break-inside: auto;" class="mt32">
+                    <div class="table-responsive">
+                        <table t-att-data-order-id="order.id" t-att-data-token="order.access_token" class="table table-sm" id="purchase_order_table">
+                            <thead class="bg-100">
+                                <tr>
+                                    <th class="text-start">Products</th>
+                                    <th class="text-end">Quantity</th>
+                                    <th class="text-end" t-if="order.state in ('sent', 'to approve')">Precio A Cotizar</th>
+
+                                    <th t-if="update_dates" class="text-end">Scheduled Date</th>
+                                    <th t-if="update_dates" class="text-end"><strong>Update Here</strong></th>
+                                    <th t-if="not update_dates and order.state in ['purchase', 'done']" t-attf-class="text-end {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">Unit Price</th>
+                                    <th t-if="not update_dates and order.state in ['purchase', 'done']" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+                                        <span>Taxes</span>
+                                    </th>
+                                    <th class="text-end" t-if="order.state in ['purchase', 'done']" >
+                                        <span groups="account.group_show_line_subtotals_tax_excluded">Amount</span>
+                                        <span groups="account.group_show_line_subtotals_tax_included">Total Price</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="purchase_tbody">
+
+                                <t t-set="current_subtotal" t-value="0"/>
+
+                                <t t-foreach="order.order_line" t-as="line">
+
+                                    <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
+                                    <t t-set="current_subtotal" t-value="current_subtotal + line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
+
+                                    <tr t-att-class="'bg-200 fw-bold o_line_section' if line.display_type == 'line_section' else 'fst-italic text-break' if line.display_type == 'line_note' else ''">
+                                        
+                                        <t t-if="not line.display_type">
+
+                                            <!-- Nombre del producto + Imagen -->
+                                            <td id="product_name">
+                                                <img t-att-src="image_data_uri(resize_to_48(line.product_id.image_1024))" alt="Product" class="d-none d-lg-inline"/>
+                                                <span t-field="line.name"/>
+                                            </td>
+
+                                            <!-- Cantidad a cotizar -->
+                                            <td class="text-end">
+                                                <div id="quote_qty">
+                                                    <span t-field="line.product_qty"/>
+                                                    <span t-field="line.product_uom" groups="uom.group_uom"/>
+                                                </div>
+                                            </td>
+
+                                            <td class="text-end" t-if="order.state == 'sent'">
+                                                <div id="dv_price_quote">
+                                                    
+                                                    <form t-attf-action="/my/purchase/#{line.id}/price?access_token=#{order.access_token}" method="post">
+                                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                        <div class="container">
+                                                        <div class="mb-3">
+                                                            <div class="input-group">
+                                                                <input type="number" class="form-control" t-attf-value="#{line.price_unit}" name="price"/>
+                                                                <button type="submit" class="btn btn-lg btn-outline-primary"><i class="fa fa-save"></i></button>
+                                                            </div>
+                                                        </div>
+                                                        </div>
+                                                    </form>
+
+                                                </div>
+                                            </td>
+
+                                            <td class="text-end" t-if="order.state == 'to approve'">
+                                                <div id="dv_price_quoted">
+                                                    <span t-field="line.price_unit"/>
+                                                </div>
+                                            </td>
+
+                                            <td t-if="update_dates" class="text-end"><span t-esc="line.date_planned.date()"/></td>
+                                            <td t-if="update_dates" class="text-end">
+                                            <form t-attf-action="/my/purchase/#{order.id}/update?access_token=#{order.access_token}" method="post">
+                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                <div class="container">
+                                                <div class="mb-3">
+                                                    <div class="input-group date">
+                                                        <input type="text" class="form-control datetimepicker-input o-purchase-datetimepicker" t-attf-id="datetimepicker_#{line.id}" t-att-name="line.id"
+                                                        data-toggle="datetimepicker" data-date-format="YYYY-MM-DD" t-attf-data-target="#datetimepicker_#{line.id}"/>
+                                                    </div>
+                                                </div>
+                                                </div>
+                                            </form>
+                                            </td>
+                                            <td t-if="not update_dates and order.state in ['purchase', 'done']" t-attf-class="text-end {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">
+                                                <div
+                                                    t-field="line.price_unit"
+                                                    class="text-end"
+                                                />
+                                            </td>
+                                            <td t-if="not update_dates and order.state in ['purchase', 'done']" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+                                                <span t-esc="', '.join(map(lambda x: (x.description or x.name), line.taxes_id))"/>
+                                            </td>
+                                            <td class="text-end" t-if="not update_dates and order.state in ['purchase', 'done']">
+                                                <span class="oe_order_line_price_subtotal" t-field="line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
+                                                <span class="oe_order_line_price_total" t-field="line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="line.display_type == 'line_section'">
+                                            <td colspan="99">
+                                                <span t-field="line.name"/>
+                                            </td>
+                                            <t t-set="current_section" t-value="line"/>
+                                            <t t-set="current_subtotal" t-value="0"/>
+                                        </t>
+                                        <t t-if="line.display_type == 'line_note'">
+                                            <td colspan="99">
+                                                <span t-field="line.name"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+
+                                    <t t-if="current_section and (line_last or order.order_line[line_index+1].display_type == 'line_section') and order.state in ['purchase', 'done']">
+                                        <tr class="is-subtotal text-end">
+                                            <td colspan="99">
+                                                <strong class="mr16">Subtotal</strong>
+                                                <span
+                                                    t-esc="current_subtotal"
+                                                    t-options='{"widget": "monetary", "display_currency": order.currency_id}'
+                                                />
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <form t-if="order.state == 'sent'" t-attf-action="/my/purchase/#{line.id}/approve?access_token=#{order.access_token}" method="post">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <div class="container">
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <button type="submit" class="btn btn-lg btn-outline-primary">Finalizar Cotización</button>
+                            </div>
+                        </div>
+                        </div>
+                    </form>
+
+                    <div id="total" t-if="order.state in ['purchase', 'done']" class="row" name="total" style="page-break-inside: avoid;">
+                        <div t-attf-class="#{'col-4' if report_type != 'html' else 'col-sm-7 col-md-5'} ms-auto">
+                            <t t-call="purchase.purchase_order_portal_content_totals_table"/>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="terms" class="mt-5" t-if="order.notes">
+                    <h3 class="">Terms &amp; Conditions</h3>
+                    <hr class="mt-0 mb-1"/>
+                    <em t-field="order.notes"/>
+                </section>
+
+                <section class="mt-5" t-if="order.payment_term_id">
+                    <h3 class="">Payment terms</h3>
+                    <hr class="mt-0 mb-1"/>
+                    <span t-field="order.payment_term_id"/>
+                </section>
+            </div>
+        </template>
+
+        <template id="purchase.portal_my_home_menu_purchase" name="Portal layout : purchase menu entries" inherit_id="portal.portal_breadcrumbs" priority="25">
+            <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'rfq' or order and order.state in ('sent', 'to approve')" t-attf-class="breadcrumb-item #{'active ' if not order else ''}">
+                <a t-if="order" t-attf-href="/my/rfq?{{ keep_query() }}">Requests for Quotation</a>
+                <t t-else="">Requests for Quotation</t>
+            </li>
+            <li t-if="page_name == 'purchase' or order and (order.state != 'sent' and order.state != 'to approve') " t-attf-class="breadcrumb-item #{'active ' if not order else ''}">
+                <a t-if="order" t-attf-href="/my/purchase?{{ keep_query() }}">Purchase Orders</a>
+                <t t-else="">Purchase Orders</t>
+            </li>
+            <li t-if="order" class="breadcrumb-item active">
+                <t t-esc="order.name"/>
+            </li>
+            </xpath>
+        </template>
+    </data>
+</odoo>
