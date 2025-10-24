@@ -50,13 +50,14 @@ class SurveyUserInputRanking(models.Model):
 
     x_response_status = fields.Selection(
         [
-            ('responded', 'Respondió'),
-            ('not_responded', 'No respondió'),
+            ('done', 'Completado'),
+            ('in_progress', 'En progreso'),
+            ('new', 'Sin iniciar'),
         ],
         string='Estado de Respuesta',
         compute='_compute_ranking_metrics',
         store=True,
-        help='Indica si la participación fue completada o no.',
+        help='Estado actual de la participación del usuario.',
     )
 
     x_winner_status = fields.Selection(
@@ -99,9 +100,9 @@ class SurveyUserInputRanking(models.Model):
                 record.x_ranking_total = 0
                 record.x_ranking_percentile = 0.0
                 record.x_ranking_medal = False
-                record.x_response_status = 'not_responded'
+                record.x_response_status = record.state if record.state in ('done', 'in_progress', 'new') else 'new'
                 record.x_winner_status = 'not_winner'
-                record.x_participation_weight = 0
+                record.x_participation_weight = 1
                 continue
             if survey_id not in surveys_to_process:
                 surveys_to_process[survey_id] = survey
@@ -140,7 +141,7 @@ class SurveyUserInputRanking(models.Model):
                     'x_ranking_total': total_completed,
                     'x_ranking_percentile': round(percentile, 2),
                     'x_ranking_medal': medal,
-                    'x_response_status': 'responded',
+                    'x_response_status': 'done',  # Siempre 'done' porque están en completed_inputs
                     'x_winner_status': winner_status,
                     'x_participation_weight': 1,
                 })
@@ -148,26 +149,34 @@ class SurveyUserInputRanking(models.Model):
         # Participaciones no completadas o sin puntaje
         pending_inputs = all_inputs - completed_inputs
         if pending_inputs:
-            pending_inputs.sudo().write({
-                'x_ranking_position': 0,
-                'x_ranking_total': total_completed,
-                'x_ranking_percentile': 0.0,
-                'x_ranking_medal': False,
-                'x_response_status': 'not_responded',
-                'x_winner_status': 'not_winner',
-                'x_participation_weight': 1,
-            })
+            for rec in pending_inputs:
+                # Determinar estado basado en el state real del registro
+                response_status = rec.state if rec.state in ('in_progress', 'new') else 'new'
+                
+                rec.sudo().write({
+                    'x_ranking_position': 0,
+                    'x_ranking_total': total_completed,
+                    'x_ranking_percentile': 0.0,
+                    'x_ranking_medal': False,
+                    'x_response_status': response_status,
+                    'x_winner_status': 'not_winner',
+                    'x_participation_weight': 1,
+                })
 
         if not total_completed:
-            all_inputs.sudo().write({
-                'x_ranking_position': 0,
-                'x_ranking_total': 0,
-                'x_ranking_percentile': 0.0,
-                'x_ranking_medal': False,
-                'x_response_status': 'not_responded',
-                'x_winner_status': 'not_winner',
-                'x_participation_weight': 1,
-            })
+            # Si nadie ha completado, asignar estado según el state real
+            for rec in all_inputs:
+                response_status = rec.state if rec.state in ('done', 'in_progress', 'new') else 'new'
+                
+                rec.sudo().write({
+                    'x_ranking_position': 0,
+                    'x_ranking_total': 0,
+                    'x_ranking_percentile': 0.0,
+                    'x_ranking_medal': False,
+                    'x_response_status': response_status,
+                    'x_winner_status': 'not_winner',
+                    'x_participation_weight': 1,
+                })
 
     def _get_available_score_fields(self):
         """Devuelve los campos de puntaje disponibles respetando la prioridad definida."""

@@ -5,7 +5,7 @@
     # ============================================================
     "name": "Survey Extension",
     "summary": "Extiende Encuestas con público objetivo, ranking y dashboards.",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "category": "Surveys",
     "author": "Your Company",
     "website": "https://www.example.com",

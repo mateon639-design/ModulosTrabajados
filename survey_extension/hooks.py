@@ -47,8 +47,46 @@ def post_init_hook(env):
     # Asignar códigos a encuestas existentes
     env["survey.survey"]._assign_missing_codes()
     
+    # Migrar estados de respuesta
+    _migrate_response_status(env)
+    
     # Recalcular rankings
     _recalculate_rankings(env)
+
+
+def _migrate_response_status(env):
+    """
+    Migrar x_response_status para usar los nuevos valores basados en state.
+    """
+    try:
+        _logger.info("Migrando estados de respuesta...")
+        
+        # Actualizar registros completados
+        done_inputs = env['survey.user_input'].sudo().search([('state', '=', 'done')])
+        if done_inputs:
+            done_inputs.write({'x_response_status': 'done'})
+            _logger.info(f"  ✓ {len(done_inputs)} registros marcados como 'Completado'")
+        
+        # Actualizar registros en progreso
+        progress_inputs = env['survey.user_input'].sudo().search([('state', '=', 'in_progress')])
+        if progress_inputs:
+            progress_inputs.write({'x_response_status': 'in_progress'})
+            _logger.info(f"  ✓ {len(progress_inputs)} registros marcados como 'En progreso'")
+        
+        # Actualizar registros sin iniciar
+        new_inputs = env['survey.user_input'].sudo().search([
+            '|', ('state', '=', 'new'), 
+            ('state', 'not in', ['done', 'in_progress', 'new'])
+        ])
+        if new_inputs:
+            new_inputs.write({'x_response_status': 'new'})
+            _logger.info(f"  ✓ {len(new_inputs)} registros marcados como 'Sin iniciar'")
+        
+        env.cr.commit()
+        _logger.info("✅ Estados de respuesta migrados correctamente!")
+        
+    except Exception as e:
+        _logger.error(f"❌ Error migrando estados: {e}", exc_info=True)
 
 
 def _recalculate_rankings(env):

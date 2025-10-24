@@ -43,7 +43,7 @@ PROPÓSITO: Vistas de ranking y dashboard para análisis de encuestas
         <field name="x_survey_duration_display" string="Tiempo"/>
         <field name="end_datetime" optional="hide"/>
         <field name="x_ranking_percentile" string="Percentil" widget="percentage" optional="hide"/>
-        <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state == 'in_progress'" invisible="1"/>
+        <field name="state" string="Estado" widget="badge" decoration-success="state == 'done'" decoration-info="state == 'in_progress'" optional="show"/>
       </list>
     </field>
   </record>
@@ -103,7 +103,7 @@ PROPÓSITO: Vistas de ranking y dashboard para análisis de encuestas
               </div>
               <div class="o_kanban_record_bottom">
                 <div class="oe_kanban_bottom_left">
-                  <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state == 'in_progress'" invisible="1"/>
+                  <field name="state" string="Estado" widget="badge" decoration-success="state == 'done'" decoration-info="state == 'in_progress'"/>
                 </div>
               </div>
             </div>
