@@ -186,6 +186,13 @@ class ContactImportWizard(models.TransientModel):
             else:
                 record.file_type = False
 
+    @api.depends('conflict_ids')
+    def _compute_has_conflicts(self):
+        """Calcula si hay conflictos y cuántos."""
+        for record in self:
+            record.conflict_count = len(record.conflict_ids)
+            record.has_conflicts = record.conflict_count > 0
+
     def action_next_step(self):
         """Avanza al siguiente paso del wizard."""
         self.ensure_one()
