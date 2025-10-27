@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menú principal: Importe Data -->
+    <menuitem
+        id="menu_importe_data_root"
+        name="Importe Data"
+        sequence="100"
+        action="action_import_history"
+        web_icon="importe_data,static/description/icon.png"
+        groups="base.group_user"/>
+
+    <!-- Submenú: Historial de Importaciones -->
+    <menuitem
+        id="menu_import_history"
+        name="Historial de Importaciones"
+        parent="menu_importe_data_root"
+        action="action_import_history"
+        sequence="10"
+        groups="base.group_user"/>
+
+    <!-- Submenú: Importar Contactos (Wizard) -->
+    <menuitem
+        id="menu_contact_import"
+        name="Importar Contactos"
+        parent="menu_importe_data_root"
+        action="action_contact_import_wizard"
+        sequence="20"
+        groups="base.group_user"/>
+
+    <!-- Submenú: Contactos (acceso rápido) -->
+    <menuitem
+        id="menu_contacts_shortcut"
+        name="Ver Contactos"
+        parent="menu_importe_data_root"
+        action="contacts.action_contacts"
+        sequence="30"
+        groups="base.group_user"/>
+
+</odoo>

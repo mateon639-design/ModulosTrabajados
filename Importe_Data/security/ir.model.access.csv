@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_contact_import_wizard_user,contact.import.wizard user,model_contact_import_wizard,base.group_user,1,1,1,1
+access_contact_import_column_user,contact.import.column user,model_contact_import_column,base.group_user,1,1,1,1
+access_contact_import_conflict_user,contact.import.conflict user,model_contact_import_conflict,base.group_user,1,1,1,1
+access_import_history_user,import.history user,model_import_history,base.group_user,1,1,1,1

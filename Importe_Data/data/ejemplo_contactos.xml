@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Archivo de ejemplo XML para importación de contactos -->
+        <!-- Este archivo sirve como referencia para el formato XML esperado -->
+        
+        <!-- Ejemplo de estructura:
+        <records>
+            <record>
+                <name>Juan Pérez García</name>
+                <vat>12345678A</vat>
+                <email>juan.perez@ejemplo.com</email>
+                <phone>+34 912 345 678</phone>
+                <mobile>+34 612 345 678</mobile>
+                <street>Calle Principal 123</street>
+                <city>Madrid</city>
+                <country_id>ES</country_id>
+                <comment>Estudiante de 5to grado</comment>
+            </record>
+            <record>
+                <name>María López Sánchez</name>
+                <vat>87654321B</vat>
+                <email>maria.lopez@ejemplo.com</email>
+                <phone>+34 913 456 789</phone>
+                <mobile>+34 613 456 789</mobile>
+                <street>Avenida Central 456</street>
+                <city>Barcelona</city>
+                <country_id>ES</country_id>
+                <comment>Profesora de Matemáticas</comment>
+            </record>
+        </records>
+        -->
+    </data>
+</odoo>

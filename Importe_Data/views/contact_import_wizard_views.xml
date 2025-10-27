@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista List para ContactImportColumn -->
+    <record id="view_contact_import_column_list" model="ir.ui.view">
+        <field name="name">contact.import.column.list</field>
+        <field name="model">contact.import.column</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" create="0" delete="0" decoration-muted="not odoo_field">
+                <field name="column_name" readonly="1"/>
+                <field name="odoo_field"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista List para Conflictos de Importación -->
+    <record id="view_contact_import_conflict_list" model="ir.ui.view">
+        <field name="name">contact.import.conflict.list</field>
+        <field name="model">contact.import.conflict</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" create="0" delete="0" 
+                  decoration-info="action == 'update'"
+                  decoration-success="action == 'create'"
+                  decoration-muted="action == 'skip'">
+                <field name="row_number" readonly="1"/>
+                <field name="conflict_type" readonly="1" widget="badge"/>
+                <field name="new_name" readonly="1"/>
+                <field name="new_vat" readonly="1"/>
+                <field name="new_email" readonly="1"/>
+                <field name="existing_partner_id" readonly="1"/>
+                <field name="existing_name" readonly="1"/>
+                <field name="existing_vat" readonly="1"/>
+                <field name="existing_email" readonly="1"/>
+                <field name="action" widget="radio"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista del Wizard de Importación de Contactos -->
+    <record id="view_contact_import_wizard_form" model="ir.ui.view">
+        <field name="name">contact.import.wizard.form</field>
+        <field name="model">contact.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Importar Contactos">
+                <header>
+                    <!-- Paso 1: Cargar Archivo -->
+                    <button name="action_next_step" 
+                            string="Siguiente" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="step != 'upload'"/>
+                    
+                    <!-- Paso 2: Mapear Campos -->
+                    <button name="action_next_step" 
+                            string="Vista Previa" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="step != 'mapping'"/>
+                    <button name="action_previous_step" 
+                            string="Anterior" 
+                            type="object" 
+                            class="btn-secondary"
+                            invisible="step != 'mapping'"/>
+                    
+                    <!-- Paso 3: Previsualizar -->
+                    <button name="action_next_step" 
+                            string="Continuar" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="step != 'preview'"/>
+                    <button name="action_previous_step" 
+                            string="Anterior" 
+                            type="object" 
+                            class="btn-secondary"
+                            invisible="step != 'preview'"/>
+                    
+                    <!-- Paso 4: Resolver Conflictos -->
+                    <button name="action_next_step" 
+                            string="Confirmar e Importar" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="step != 'conflicts'"
+                            confirm="¿Está seguro de que desea importar con las acciones seleccionadas?"/>
+                    <button name="action_previous_step" 
+                            string="Anterior" 
+                            type="object" 
+                            class="btn-secondary"
+                            invisible="step != 'conflicts'"/>
+                    
+                    <!-- Paso 5: Resultado -->
+                    <button string="Ver Creados" 
+                            name="action_view_created" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="step != 'result' or to_create == 0"/>
+                    <button string="Ver Actualizados" 
+                            name="action_view_updated" 
+                            type="object" 
+                            class="btn-secondary"
+                            invisible="step != 'result' or to_update == 0"/>
+                    <button string="Cerrar" 
+                            special="cancel" 
+                            class="btn-secondary"
+                            invisible="step != 'result'"/>
+                    
+                    <!-- Indicador de progreso -->
+                    <field name="step" widget="statusbar" 
+                           statusbar_visible="upload,mapping,preview,conflicts,result"
+                           options="{'clickable': '0'}"/>
+                </header>
+
+                <sheet>
+                    <!-- ============================================ -->
+                    <!-- PASO 1: CARGAR ARCHIVO -->
+                    <!-- ============================================ -->
+                    <div invisible="step != 'upload'">
+                        <div class="alert alert-info" role="alert">
+                            <strong>Paso 1:</strong> Cargue un archivo CSV, Excel (XLSX) o XML con los datos de contactos.
+                        </div>
+                        
+                        <group>
+                            <group>
+                                <field name="file_data" filename="file_name" required="1"/>
+                                <field name="file_name" invisible="1"/>
+                                <field name="file_type" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="contact_type" widget="radio" required="1"/>
+                                <field name="region" placeholder="Ej: Norte, Centro, Bogotá..."/>
+                            </group>
+                        </group>
+
+                        <group string="Configuración del Archivo (solo para CSV)">
+                            <group>
+                                <field name="has_header"/>
+                                <field name="csv_delimiter" invisible="file_type != 'csv'"/>
+                            </group>
+                            <group>
+                                <field name="csv_encoding" invisible="file_type != 'csv'"/>
+                            </group>
+                        </group>
+
+                        <div class="alert alert-warning" role="alert">
+                            <strong>Formatos soportados:</strong>
+                            <ul>
+                                <li><strong>CSV:</strong> Archivo de texto separado por delimitadores</li>
+                                <li><strong>Excel (XLSX):</strong> Hoja de cálculo de Microsoft Excel</li>
+                                <li><strong>XML:</strong> Archivo XML con estructura de registros</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- ============================================ -->
+                    <!-- PASO 2: MAPEAR CAMPOS -->
+                    <!-- ============================================ -->
+                    <div invisible="step != 'mapping'">
+                        <div class="alert alert-info" role="alert">
+                            <strong>Paso 2:</strong> Mapee las columnas del archivo a los campos de Odoo. 
+                            El sistema ha intentado detectar automáticamente las coincidencias.
+                        </div>
+
+                        <group>
+                            <field name="column_ids" nolabel="1" context="{'list_view_ref': 'importe_data.view_contact_import_column_list'}"/>
+                        </group>
+
+                        <div class="alert alert-warning" role="alert">
+                            <strong>Nota:</strong> Debe mapear al menos un campo para continuar. 
+                            Los campos <em>Nombre</em> o <em>Email</em> son recomendados como mínimo.
+                        </div>
+                    </div>
+
+                    <!-- ============================================ -->
+                    <!-- PASO 3: PREVISUALIZAR -->
+                    <!-- ============================================ -->
+                    <div invisible="step != 'preview'">
+                        <div class="alert alert-info" role="alert">
+                            <strong>Paso 3:</strong> Revise los datos que serán importados. 
+                            A continuación se muestran las primeras 10 filas del archivo.
+                        </div>
+
+                        <group>
+                            <group>
+                                <label for="contact_type" string="Tipo de Contacto"/>
+                                <div>
+                                    <field name="contact_type" readonly="1" class="oe_inline"/>
+                                </div>
+                            </group>
+                            <group>
+                                <label for="region" string="Región"/>
+                                <div>
+                                    <field name="region" readonly="1" class="oe_inline"/>
+                                </div>
+                            </group>
+                        </group>
+
+                        <separator string="Vista Previa de Datos"/>
+                        <field name="preview_data" widget="html" nolabel="1"/>
+
+                        <div class="alert alert-warning" role="alert">
+                            <strong>Importante:</strong> El sistema validará contactos existentes por 
+                            <em>Cédula</em>, <em>Email</em> o <em>Nombre</em>. 
+                            Si se encuentran coincidencias, podrá decidir qué hacer en el siguiente paso.
+                        </div>
+                    </div>
+
+                    <!-- ============================================ -->
+                    <!-- PASO 4: RESOLVER CONFLICTOS -->
+                    <!-- ============================================ -->
+                    <div invisible="step != 'conflicts'">
+                        <div class="alert alert-warning" role="alert">
+                            <strong>Paso 4:</strong> Se han detectado <field name="conflict_count" readonly="1" class="oe_inline"/> conflictos con contactos existentes.
+                            Revise cada uno y seleccione la acción a realizar.
+                        </div>
+
+                        <div class="alert alert-info" role="alert">
+                            <strong>Acciones disponibles:</strong>
+                            <ul>
+                                <li><strong>Actualizar existente:</strong> Actualiza los datos del contacto que ya existe</li>
+                                <li><strong>Crear nuevo:</strong> Crea un nuevo contacto aunque ya exista uno similar</li>
+                                <li><strong>Omitir esta fila:</strong> No importa esta fila del archivo</li>
+                            </ul>
+                        </div>
+
+                        <separator string="Conflictos Detectados"/>
+                        <field name="conflict_ids" nolabel="1" context="{'list_view_ref': 'importe_data.view_contact_import_conflict_list'}"/>
+                    </div>
+
+                    <!-- ============================================ -->
+                    <!-- PASO 5: RESULTADO -->
+                    <!-- ============================================ -->
+                    <div invisible="step != 'result'">
+                        <div class="alert alert-success" role="alert">
+                            <strong>¡Importación Completada!</strong> A continuación se muestra el resumen de la operación.
+                        </div>
+
+                        <group>
+                            <group string="Resumen de Importación">
+                                <field name="total_rows" readonly="1"/>
+                                <field name="to_create" readonly="1"/>
+                                <field name="to_update" readonly="1"/>
+                                <field name="with_errors" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <separator string="Log de Errores" invisible="with_errors == 0"/>
+                        <field name="error_log" 
+                               widget="text" 
+                               nolabel="1" 
+                               readonly="1"
+                               invisible="with_errors == 0"/>
+
+                        <div class="alert alert-info" role="alert" invisible="to_create == 0 and to_update == 0">
+                            Use los botones de la parte superior para ver los contactos creados o actualizados.
+                        </div>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción del Wizard -->
+    <record id="action_contact_import_wizard" model="ir.actions.act_window">
+        <field name="name">Importar Contactos</field>
+        <field name="res_model">contact.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="base.model_res_partner"/>
+    </record>
+
+</odoo>

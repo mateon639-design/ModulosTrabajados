@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista Kanban del Historial de Importaciones -->
+    <record id="view_import_history_kanban" model="ir.ui.view">
+        <field name="name">import.history.kanban</field>
+        <field name="model">import.history</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <field name="file_name"/>
+                <field name="file_type"/>
+                <field name="import_date"/>
+                <field name="contact_type"/>
+                <field name="total_rows"/>
+                <field name="created_count"/>
+                <field name="updated_count"/>
+                <field name="error_count"/>
+                <field name="state"/>
+                <field name="success_rate"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="file_name"/>
+                                    </strong>
+                                    <div class="o_kanban_record_subtitle">
+                                        <field name="import_date" widget="datetime"/>
+                                    </div>
+                                </div>
+                                <span class="float-end">
+                                    <field name="state" widget="badge" 
+                                           decoration-success="state == 'success'"
+                                           decoration-warning="state == 'partial'"
+                                           decoration-danger="state == 'failed'"/>
+                                </span>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <span class="badge rounded-pill text-bg-info">
+                                            <i class="fa fa-file-o"/> <field name="file_type"/>
+                                        </span>
+                                        <span class="badge rounded-pill text-bg-primary ms-1">
+                                            <field name="contact_type"/>
+                                        </span>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <strong><field name="total_rows"/> filas</strong>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-4">
+                                        <span class="text-success">
+                                            <i class="fa fa-plus-circle"/> <field name="created_count"/>
+                                        </span>
+                                    </div>
+                                    <div class="col-4">
+                                        <span class="text-info">
+                                            <i class="fa fa-refresh"/> <field name="updated_count"/>
+                                        </span>
+                                    </div>
+                                    <div class="col-4">
+                                        <span class="text-danger">
+                                            <i class="fa fa-exclamation-triangle"/> <field name="error_count"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="progress mt-2" style="height: 20px;">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         t-attf-style="width: {{record.success_rate.value}}%">
+                                        <t t-esc="Math.round(record.success_rate.value)"/>%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Vista List del Historial de Importaciones -->
+    <record id="view_import_history_list" model="ir.ui.view">
+        <field name="name">import.history.list</field>
+        <field name="model">import.history</field>
+        <field name="arch" type="xml">
+            <list string="Historial de Importaciones" sample="1" 
+                  decoration-success="state == 'success'"
+                  decoration-warning="state == 'partial'"
+                  decoration-danger="state == 'failed'">
+                <field name="import_date" widget="datetime"/>
+                <field name="file_name"/>
+                <field name="file_type"/>
+                <field name="contact_type"/>
+                <field name="region"/>
+                <field name="total_rows"/>
+                <field name="created_count"/>
+                <field name="updated_count"/>
+                <field name="error_count"/>
+                <field name="success_rate" widget="progressbar"/>
+                <field name="state" widget="badge" 
+                       decoration-success="state == 'success'"
+                       decoration-warning="state == 'partial'"
+                       decoration-danger="state == 'failed'"/>
+                <field name="user_id"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista Form del Historial de Importaciones -->
+    <record id="view_import_history_form" model="ir.ui.view">
+        <field name="name">import.history.form</field>
+        <field name="model">import.history</field>
+        <field name="arch" type="xml">
+            <form string="Detalle de Importación">
+                <header>
+                    <field name="state" widget="statusbar" 
+                           statusbar_visible="success,partial,failed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_created_contacts" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-user-plus"
+                                invisible="created_count == 0">
+                            <field name="created_count" widget="statinfo" string="Creados"/>
+                        </button>
+                        <button name="action_view_updated_contacts" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-refresh"
+                                invisible="updated_count == 0">
+                            <field name="updated_count" widget="statinfo" string="Actualizados"/>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="file_name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Información del Archivo">
+                            <field name="file_type" readonly="1"/>
+                            <field name="import_date" readonly="1"/>
+                            <field name="user_id" readonly="1"/>
+                        </group>
+                        <group string="Configuración de Importación">
+                            <field name="contact_type" readonly="1"/>
+                            <field name="region" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Estadísticas">
+                            <field name="total_rows" readonly="1"/>
+                            <field name="created_count" readonly="1"/>
+                            <field name="updated_count" readonly="1"/>
+                            <field name="error_count" readonly="1"/>
+                            <field name="success_rate" widget="progressbar" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Log de Errores" invisible="error_count == 0">
+                            <field name="error_log" widget="text" readonly="1"/>
+                        </page>
+                        <page string="Contactos Creados" invisible="created_count == 0">
+                            <field name="created_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="email"/>
+                                    <field name="phone"/>
+                                    <field name="mobile"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Contactos Actualizados" invisible="updated_count == 0">
+                            <field name="updated_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="email"/>
+                                    <field name="phone"/>
+                                    <field name="mobile"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de Búsqueda -->
+    <record id="view_import_history_search" model="ir.ui.view">
+        <field name="name">import.history.search</field>
+        <field name="model">import.history</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Importaciones">
+                <field name="file_name"/>
+                <field name="contact_type"/>
+                <field name="region"/>
+                <field name="user_id"/>
+                <filter string="Exitosas" name="success" domain="[('state', '=', 'success')]"/>
+                <filter string="Parciales" name="partial" domain="[('state', '=', 'partial')]"/>
+                <filter string="Fallidas" name="failed" domain="[('state', '=', 'failed')]"/>
+                <separator/>
+                <filter string="Estudiantes" name="students" domain="[('contact_type', '=', 'student')]"/>
+                <filter string="Profesores" name="teachers" domain="[('contact_type', '=', 'teacher')]"/>
+                <separator/>
+                <filter string="CSV" name="csv" domain="[('file_type', '=', 'csv')]"/>
+                <filter string="Excel" name="xlsx" domain="[('file_type', '=', 'xlsx')]"/>
+                <filter string="XML" name="xml" domain="[('file_type', '=', 'xml')]"/>
+                <separator/>
+                <filter string="Hoy" name="today" 
+                        domain="[('import_date', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Esta Semana" name="week" 
+                        domain="[('import_date', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Este Mes" name="month" 
+                        domain="[('import_date', '&gt;=', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Tipo de Contacto" name="group_contact_type" context="{'group_by': 'contact_type'}"/>
+                    <filter string="Tipo de Archivo" name="group_file_type" context="{'group_by': 'file_type'}"/>
+                    <filter string="Estado" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Usuario" name="group_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Fecha" name="group_date" context="{'group_by': 'import_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción principal del Historial -->
+    <record id="action_import_history" model="ir.actions.act_window">
+        <field name="name">Historial de Importaciones</field>
+        <field name="res_model">import.history</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                ¡No hay importaciones registradas todavía!
+            </p>
+            <p>
+                Haga clic en el botón <b>"Importar Contactos"</b> en la parte superior 
+                para comenzar a importar contactos desde archivos CSV, Excel o XML.
+            </p>
+        </field>
+    </record>
+
+</odoo>

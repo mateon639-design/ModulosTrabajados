@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 
+        Vistas Extendidas de Contactos
+        Compatible con Odoo 18
+    -->
+
+    <!-- =====================================================
+         VISTA FORMULARIO (Form View)
+         ===================================================== -->
+    
+    <record id="view_partner_form_extension" model="ir.ui.view">
+        <field name="name">res.partner.form.extension</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Agregar widget de estado en la parte superior -->
+            <xpath expr="//form/sheet" position="before">
+                <widget name="web_ribbon" 
+                        title="Verificado" 
+                        bg_color="text-bg-success" 
+                        invisible="not custom_is_verified"/>
+            </xpath>
+
+            <!-- Agregar botones en el button_box -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_verify_contact" 
+                        type="object" 
+                        string="Verificar"
+                        class="oe_stat_button"
+                        icon="fa-check-circle"
+                        invisible="custom_is_verified"
+                        help="Marcar este contacto como verificado"/>
+                <button name="action_unverify_contact" 
+                        type="object" 
+                        string="Remover Verificación"
+                        class="oe_stat_button"
+                        icon="fa-times-circle"
+                        invisible="not custom_is_verified"
+                        help="Remover la verificación de este contacto"/>
+            </xpath>
+
+            <!-- Agregar una página nueva con campos personalizados -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Información Personalizada" name="custom_info">
+                    <group>
+                        <group string="Datos Adicionales" name="custom_data">
+                            <field name="custom_reference" placeholder="Ej: REF-001"/>
+                            <field name="custom_priority" widget="priority"/>
+                            <field name="custom_is_verified" widget="boolean_toggle"/>
+                            <field name="custom_active_date"/>
+                        </group>
+                        <group string="Notas" name="custom_notes_group">
+                            <field name="custom_notes" 
+                                   nolabel="1" 
+                                   placeholder="Escribe notas personalizadas sobre este contacto..."/>
+                        </group>
+                    </group>
+                </page>
+                
+                <!-- Nueva página de Trazabilidad de Importación -->
+                <page string="Trazabilidad de Importación" name="import_traceability" 
+                      invisible="not import_source">
+                    <group>
+                        <group string="Información de Importación" name="import_info">
+                            <field name="import_source" readonly="1"/>
+                            <field name="import_date" readonly="1"/>
+                            <field name="import_type" readonly="1"/>
+                            <field name="import_region" readonly="1"/>
+                        </group>
+                        <group string="Estadísticas de Importación" name="import_stats">
+                            <field name="last_import_update" readonly="1"/>
+                            <field name="import_count" readonly="1"/>
+                        </group>
+                    </group>
+                    <separator string="Historial en el Chatter"/>
+                    <div class="alert alert-info" role="alert">
+                        <strong>Nota:</strong> Consulta el historial completo de importaciones en la pestaña "Mensajes" del Chatter.
+                    </div>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- =====================================================
+         VISTA DE BÚSQUEDA (Search View)
+         ===================================================== -->
+    
+    <record id="view_partner_search_extension" model="ir.ui.view">
+        <field name="name">res.partner.search.extension</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            
+            <!-- Agregar campos de búsqueda personalizados -->
+            <xpath expr="//search" position="inside">
+                <field name="custom_reference" 
+                       string="Referencia"
+                       filter_domain="[('custom_reference', 'ilike', self)]"/>
+                <field name="import_source" 
+                       string="Archivo de Importación"
+                       filter_domain="[('import_source', 'ilike', self)]"/>
+                
+                <!-- Filtros personalizados -->
+                <separator/>
+                <filter name="verified_contacts" 
+                        string="Verificados"
+                        domain="[('custom_is_verified', '=', True)]"/>
+                <filter name="not_verified_contacts" 
+                        string="No Verificados"
+                        domain="[('custom_is_verified', '=', False)]"/>
+                <separator/>
+                <filter name="imported_contacts" 
+                        string="Contactos Importados"
+                        domain="[('import_source', '!=', False)]"/>
+                <filter name="imported_students" 
+                        string="Estudiantes Importados"
+                        domain="[('import_type', '=', 'student')]"/>
+                <filter name="imported_teachers" 
+                        string="Profesores Importados"
+                        domain="[('import_type', '=', 'teacher')]"/>
+                <separator/>
+                <filter name="priority_urgent" 
+                        string="Prioridad Urgente"
+                        domain="[('custom_priority', '=', 'urgent')]"/>
+                <filter name="priority_high" 
+                        string="Prioridad Alta"
+                        domain="[('custom_priority', '=', 'high')]"/>
+                
+                <!-- Agrupaciones personalizadas -->
+                <separator/>
+                <filter name="group_by_priority" 
+                        string="Prioridad"
+                        context="{'group_by': 'custom_priority'}"/>
+                <filter name="group_by_verified" 
+                        string="Estado de Verificación"
+                        context="{'group_by': 'custom_is_verified'}"/>
+                <filter name="group_by_import_type" 
+                        string="Tipo de Importación"
+                        context="{'group_by': 'import_type'}"/>
+                <filter name="group_by_import_source" 
+                        string="Archivo de Importación"
+                        context="{'group_by': 'import_source'}"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
