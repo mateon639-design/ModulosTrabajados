@@ -4,8 +4,8 @@
     # METADATA
     # ============================================================
     "name": "Survey Extension",
-    "summary": "Extiende Encuestas con público objetivo, ranking y dashboards.",
-    "version": "1.4.1",
+    "summary": "Extiende Encuestas con público objetivo, ranking, dashboards y segmentación por región y tipo.",
+    "version": "1.5.0",
     "category": "Surveys",
     "author": "Your Company",
     "website": "https://www.example.com",
@@ -36,6 +36,7 @@
         "data/question_categories.xml",
         "data/survey_sequence.xml",
         "data/survey_trash_cron.xml",
+        "data/survey_regions.xml",
 
         # --- Vistas y acciones (UI) ---
         # IMPORTANTE: Los wizards deben cargarse ANTES de las vistas que los referencian
@@ -50,8 +51,10 @@
 
         # Herencias / vistas existentes del módulo
         "views/survey_user_input_inherit_views.xml",
+        "views/survey_user_input_segmentation_views.xml",
         "views/survey_survey_inherit_views.xml",
         "views/survey_ranking_dashboard_views.xml",
+        "views/survey_region_views.xml",
         "views/report_survey_summary.xml",
         "views/survey_trash_views.xml",
         "views/survey_key_counter_views.xml",

@@ -65,6 +65,51 @@ class SurveySurvey(models.Model):
         groups="base.group_user",
     )
 
+    # ----------------------------------------------------------------------
+    # Campos de Segmentación
+    # ----------------------------------------------------------------------
+    target_region_ids = fields.Many2many(
+        comodel_name='survey.region',
+        relation='survey_target_region_rel',
+        column1='survey_id',
+        column2='region_id',
+        string='Regiones Objetivo',
+        help='Regiones específicas a las que se dirige esta encuesta',
+        groups='base.group_user',
+    )
+
+    target_participant_types = fields.Selection(
+        [
+            ('all', 'Todos'),
+            ('student', 'Solo Estudiantes'),
+            ('teacher', 'Solo Profesores'),
+            ('student_teacher', 'Estudiantes y Profesores'),
+        ],
+        string='Tipos de Participantes',
+        default='all',
+        help='Tipos de participantes objetivo para esta encuesta',
+        groups='base.group_user',
+    )
+
+    # Campos estadísticos de segmentación
+    response_count_by_region = fields.Integer(
+        string='Respuestas por Región',
+        compute='_compute_segmentation_stats',
+        help='Número de regiones diferentes con respuestas'
+    )
+
+    response_count_students = fields.Integer(
+        string='Respuestas de Estudiantes',
+        compute='_compute_segmentation_stats',
+        help='Cantidad de respuestas de estudiantes'
+    )
+
+    response_count_teachers = fields.Integer(
+        string='Respuestas de Profesores',
+        compute='_compute_segmentation_stats',
+        help='Cantidad de respuestas de profesores'
+    )
+
     @api.model
     def default_get(self, fields_list):
         result = super().default_get(fields_list)
@@ -159,6 +204,23 @@ class SurveySurvey(models.Model):
             else:
                 survey.version_date = date(normalized_year, 1, 1)
 
+    @api.depends('user_input_ids.participant_region_id', 'user_input_ids.participant_type')
+    def _compute_segmentation_stats(self):
+        """Calcula estadísticas de segmentación de respuestas"""
+        for survey in self:
+            # Contar regiones únicas con respuestas
+            regions = survey.user_input_ids.mapped('participant_region_id')
+            survey.response_count_by_region = len(regions)
+
+            # Contar respuestas por tipo
+            survey.response_count_students = survey.user_input_ids.filtered(
+                lambda r: r.participant_type == 'student'
+            ).search_count([('id', 'in', survey.user_input_ids.ids), ('participant_type', '=', 'student')])
+
+            survey.response_count_teachers = survey.user_input_ids.filtered(
+                lambda r: r.participant_type == 'teacher'
+            ).search_count([('id', 'in', survey.user_input_ids.ids), ('participant_type', '=', 'teacher')])
+
     # ----------------------------------------------------------------------
     # Acción de reporte (tolerante a id alternativo)
     # ----------------------------------------------------------------------
@@ -196,6 +258,44 @@ class SurveySurvey(models.Model):
             "res_id": wizard.id,
             "target": "new",
             "context": ctx,
+        }
+
+    def action_view_participants_by_segment(self):
+        """Acción para ver participantes agrupados por segmento"""
+        self.ensure_one()
+        return {
+            'name': _('Participantes por Segmento'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'survey.user_input',
+            'view_mode': 'list,form,pivot,graph',
+            'domain': [('survey_id', '=', self.id)],
+            'context': {
+                'group_by': ['participant_region_id', 'participant_type'],
+                'search_default_group_by_region': 1,
+                'search_default_group_by_type': 1,
+            },
+        }
+
+    def action_view_participants_students(self):
+        """Ver solo participantes estudiantes"""
+        self.ensure_one()
+        return {
+            'name': _('Estudiantes'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'survey.user_input',
+            'view_mode': 'list,form',
+            'domain': [('survey_id', '=', self.id), ('participant_type', '=', 'student')],
+        }
+
+    def action_view_participants_teachers(self):
+        """Ver solo participantes profesores"""
+        self.ensure_one()
+        return {
+            'name': _('Profesores'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'survey.user_input',
+            'view_mode': 'list,form',
+            'domain': [('survey_id', '=', self.id), ('participant_type', '=', 'teacher')],
         }
 
     def _prepare_trash_payload(self):

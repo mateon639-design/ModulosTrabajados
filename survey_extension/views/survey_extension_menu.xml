@@ -25,6 +25,24 @@ DETALLES:
       sequence="40"
       groups="survey.group_survey_user,survey.group_survey_manager"/>
 
+  <!-- Submenú: Regiones -->
+  <menuitem
+      id="menu_survey_region"
+      name="Regiones"
+      parent="survey_extension_menu_root"
+      action="action_survey_region"
+      sequence="10"
+      groups="survey.group_survey_user,survey.group_survey_manager"/>
+
+  <!-- Submenú: Análisis de Segmentación -->
+  <menuitem
+      id="menu_survey_segmentation_analysis"
+      name="Análisis por Segmentación"
+      parent="survey_extension_menu_root"
+      action="action_survey_user_input_segmentation_analysis"
+      sequence="20"
+      groups="survey.group_survey_user,survey.group_survey_manager"/>
+
   <!-- NUEVO TAB: Dispositivos (nivel superior) -->
   <menuitem
       id="menu_survey_device_root"

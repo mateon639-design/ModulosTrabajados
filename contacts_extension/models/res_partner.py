@@ -106,8 +106,108 @@ class ResPartner(models.Model):
     )
     
     # ===========================
+    # HISTORIAL DE ENCUESTAS
+    # ===========================
+    
+    survey_count = fields.Integer(
+        string='Total de Encuestas',
+        compute='_compute_survey_statistics',
+        help='Cantidad total de encuestas en las que ha participado',
+    )
+    
+    survey_completed_count = fields.Integer(
+        string='Encuestas Completadas',
+        compute='_compute_survey_statistics',
+        help='Cantidad de encuestas completadas (finalizadas)',
+    )
+    
+    survey_in_progress_count = fields.Integer(
+        string='Encuestas en Proceso',
+        compute='_compute_survey_statistics',
+        help='Cantidad de encuestas iniciadas pero no finalizadas',
+    )
+    
+    last_survey_date = fields.Datetime(
+        string='Última Encuesta',
+        compute='_compute_survey_statistics',
+        help='Fecha de la última encuesta respondida',
+    )
+    
+    survey_average_score = fields.Float(
+        string='Promedio de Puntaje',
+        compute='_compute_survey_statistics',
+        digits=(16, 2),
+        help='Promedio de puntajes obtenidos en encuestas calificables',
+    )
+    
+    # ===========================
     # MÉTODOS COMPUTADOS
     # ===========================
+    
+    def _compute_survey_statistics(self):
+        """
+        Calcula estadísticas de participación en encuestas.
+        Solo funciona si el módulo 'survey' está instalado.
+        """
+        # Verificar si el módulo survey está instalado
+        if 'survey.user_input' not in self.env:
+            # Si no está instalado, poner valores por defecto
+            for partner in self:
+                partner.survey_count = 0
+                partner.survey_completed_count = 0
+                partner.survey_in_progress_count = 0
+                partner.last_survey_date = False
+                partner.survey_average_score = 0.0
+            return
+        
+        for partner in self:
+            try:
+                # Buscar las encuestas del partner
+                inputs = self.env['survey.user_input'].search([
+                    ('partner_id', '=', partner.id)
+                ])
+                
+                # Total de encuestas
+                partner.survey_count = len(inputs)
+                
+                # Encuestas completadas
+                completed = inputs.filtered(lambda i: i.state == 'done')
+                partner.survey_completed_count = len(completed)
+                
+                # Encuestas en proceso
+                in_progress = inputs.filtered(lambda i: i.state == 'in_progress')
+                partner.survey_in_progress_count = len(in_progress)
+                
+                # Última fecha de encuesta (usar create_date o end_datetime)
+                if completed:
+                    # Intentar obtener end_datetime si existe, sino create_date
+                    last_dates = []
+                    for inp in completed:
+                        if hasattr(inp, 'end_datetime') and inp.end_datetime:
+                            last_dates.append(inp.end_datetime)
+                        elif inp.create_date:
+                            last_dates.append(inp.create_date)
+                    
+                    if last_dates:
+                        partner.last_survey_date = max(last_dates)
+                    else:
+                        partner.last_survey_date = False
+                else:
+                    partner.last_survey_date = False
+                
+                # Promedio de puntajes (solo encuestas calificadas)
+                scored_inputs = completed.filtered(lambda i: hasattr(i, 'x_score_percent') and i.x_score_percent > 0)
+                if scored_inputs:
+                    partner.survey_average_score = sum(scored_inputs.mapped('x_score_percent')) / len(scored_inputs)
+                else:
+                    partner.survey_average_score = 0.0
+            except Exception:
+                # En caso de error, valores por defecto
+                partner.survey_count = 0
+                partner.survey_completed_count = 0
+                partner.survey_in_progress_count = 0
+                partner.last_survey_date = False
+                partner.survey_average_score = 0.0
     
     @api.depends('name', 'custom_reference')
     def _compute_display_name(self):
@@ -131,7 +231,8 @@ class ResPartner(models.Model):
         Valida que la referencia personalizada sea única si está definida.
         """
         for partner in self:
-            if partner.custom_reference:
+            # Solo validar si hay un valor en custom_reference
+            if partner.custom_reference and partner.custom_reference.strip():
                 duplicate = self.search([
                     ('id', '!=', partner.id),
                     ('custom_reference', '=', partner.custom_reference),
@@ -243,6 +344,44 @@ class ResPartner(models.Model):
                 'type': 'info',
                 'sticky': False,
             }
+        }
+    
+    def action_view_surveys(self):
+        """
+        Acción para ver todas las encuestas del contacto.
+        """
+        self.ensure_one()
+        return {
+            'name': _('Encuestas de %s') % self.name,
+            'type': 'ir.actions.act_window',
+            'res_model': 'survey.user_input',
+            'view_mode': 'list,form',
+            'domain': [('partner_id', '=', self.id)],
+            'context': {
+                'default_partner_id': self.id,
+                'search_default_partner_id': self.id,
+            },
+            'target': 'current',
+        }
+    
+    def action_view_completed_surveys(self):
+        """
+        Acción para ver solo las encuestas completadas del contacto.
+        """
+        self.ensure_one()
+        return {
+            'name': _('Encuestas Completadas - %s') % self.name,
+            'type': 'ir.actions.act_window',
+            'res_model': 'survey.user_input',
+            'view_mode': 'list,form',
+            'domain': [
+                ('partner_id', '=', self.id),
+                ('state', '=', 'done'),
+            ],
+            'context': {
+                'default_partner_id': self.id,
+            },
+            'target': 'current',
         }
     
     # ===========================

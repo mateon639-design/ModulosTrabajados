@@ -818,3 +818,21 @@ class ContactImportWizard(models.TransientModel):
             'view_mode': 'list,form',
             'domain': [('id', 'in', self.updated_ids.ids)],
         }
+
+    def action_update_all_conflicts(self):
+        """Establece la acción 'actualizar' para todos los conflictos."""
+        self.ensure_one()
+        self.conflict_ids.write({'action': 'update'})
+        return self._reopen_wizard()
+
+    def action_skip_all_conflicts(self):
+        """Establece la acción 'omitir' para todos los conflictos."""
+        self.ensure_one()
+        self.conflict_ids.write({'action': 'skip'})
+        return self._reopen_wizard()
+
+    def action_create_all_conflicts(self):
+        """Establece la acción 'crear nuevo' para todos los conflictos."""
+        self.ensure_one()
+        self.conflict_ids.write({'action': 'create'})
+        return self._reopen_wizard()

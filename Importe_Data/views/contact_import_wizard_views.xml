@@ -222,6 +222,28 @@
 
                         <separator string="Conflictos Detectados"/>
                         <field name="conflict_ids" nolabel="1" context="{'list_view_ref': 'importe_data.view_contact_import_conflict_list'}"/>
+
+                        <div class="mt16 mb16">
+                            <p><strong>Acciones masivas:</strong></p>
+                            <button name="action_update_all_conflicts" 
+                                    string="Actualizar Todos" 
+                                    type="object" 
+                                    class="btn btn-primary me-2"
+                                    icon="fa-refresh"
+                                    help="Establece 'Actualizar existente' para todos los conflictos"/>
+                            <button name="action_skip_all_conflicts" 
+                                    string="Omitir Todos" 
+                                    type="object" 
+                                    class="btn btn-secondary me-2"
+                                    icon="fa-ban"
+                                    help="Establece 'Omitir' para todos los conflictos"/>
+                            <button name="action_create_all_conflicts" 
+                                    string="Crear Todos Nuevos" 
+                                    type="object" 
+                                    class="btn btn-success"
+                                    icon="fa-plus"
+                                    help="Establece 'Crear nuevo' para todos los conflictos"/>
+                        </div>
                     </div>
 
                     <!-- ============================================ -->

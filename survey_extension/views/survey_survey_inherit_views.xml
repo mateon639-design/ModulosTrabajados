@@ -77,6 +77,58 @@ NOTAS:
                      help="Porcentaje mínimo para aprobar (solo si es calificable)."/>
             </group>
           </group>
+          
+          <!-- Sección de Segmentación -->
+          <group string="Segmentación de Participantes">
+            <group>
+              <field name="target_region_ids"
+                     widget="many2many_tags"
+                     string="Regiones Objetivo"
+                     placeholder="Selecciona regiones"
+                     help="Regiones geográficas a las que se dirige esta encuesta."/>
+              <field name="target_participant_types"
+                     string="Tipos de Participantes"
+                     help="Define qué tipos de participantes son el objetivo de esta encuesta."/>
+            </group>
+            <group>
+              <field name="response_count_by_region" readonly="1"
+                     string="Regiones con Respuestas"/>
+              <field name="response_count_students" readonly="1"
+                     string="Respuestas de Estudiantes"
+                     invisible="target_participant_types not in ['student', 'student_teacher', 'all']"/>
+              <field name="response_count_teachers" readonly="1"
+                     string="Respuestas de Profesores"
+                     invisible="target_participant_types not in ['teacher', 'student_teacher', 'all']"/>
+            </group>
+          </group>
+          
+          <!-- Botones de análisis por segmentación -->
+          <div class="oe_button_box" name="segmentation_buttons" style="margin-top: 16px;">
+            <button class="oe_stat_button" 
+                    type="object" 
+                    name="action_view_participants_by_segment"
+                    icon="fa-pie-chart"
+                    help="Ver participantes agrupados por segmento">
+              <div class="o_field_widget o_stat_info">
+                <span class="o_stat_text">Análisis</span>
+                <span class="o_stat_text">por Segmento</span>
+              </div>
+            </button>
+            <button class="oe_stat_button" 
+                    type="object" 
+                    name="action_view_participants_students"
+                    icon="fa-graduation-cap"
+                    invisible="response_count_students == 0">
+              <field name="response_count_students" widget="statinfo" string="Estudiantes"/>
+            </button>
+            <button class="oe_stat_button" 
+                    type="object" 
+                    name="action_view_participants_teachers"
+                    icon="fa-chalkboard-teacher"
+                    invisible="response_count_teachers == 0">
+              <field name="response_count_teachers" widget="statinfo" string="Profesores"/>
+            </button>
+          </div>
         </page>
 
         <!-- Resultados -->

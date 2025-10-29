@@ -25,6 +25,24 @@
 
             <!-- Agregar botones en el button_box -->
             <xpath expr="//div[@name='button_box']" position="inside">
+                <!-- Botones de Encuestas -->
+                <button name="action_view_surveys" 
+                        type="object" 
+                        class="oe_stat_button"
+                        icon="fa-clipboard"
+                        invisible="survey_count == 0">
+                    <field name="survey_count" widget="statinfo" string="Encuestas"/>
+                </button>
+                
+                <button name="action_view_completed_surveys" 
+                        type="object" 
+                        class="oe_stat_button"
+                        icon="fa-check-square"
+                        invisible="survey_completed_count == 0">
+                    <field name="survey_completed_count" widget="statinfo" string="Completadas"/>
+                </button>
+                
+                <!-- Botones de Verificación -->
                 <button name="action_verify_contact" 
                         type="object" 
                         string="Verificar"
@@ -78,6 +96,57 @@
                     <div class="alert alert-info" role="alert">
                         <strong>Nota:</strong> Consulta el historial completo de importaciones en la pestaña "Mensajes" del Chatter.
                     </div>
+                </page>
+                
+                <!-- Nueva página de Historial de Encuestas -->
+                <page string="Historial de Encuestas" name="survey_history">
+                    
+                    <!-- Mensaje cuando no hay encuestas -->
+                    <div class="alert alert-warning text-center" role="alert" 
+                         invisible="survey_count &gt; 0">
+                        <h4>📋 Sin Encuestas Registradas</h4>
+                        <p>Este contacto aún no ha participado en ninguna encuesta.</p>
+                        <p class="mb-0"><small>Las encuestas aparecerán aquí automáticamente cuando el contacto participe en ellas.</small></p>
+                    </div>
+                    
+                    <!-- Contenido cuando hay encuestas -->
+                    <div invisible="survey_count == 0">
+                        <!-- Estadísticas Resumidas -->
+                        <group>
+                            <group string="Estadísticas Generales" name="survey_stats">
+                                <field name="survey_count" readonly="1"/>
+                                <field name="survey_completed_count" readonly="1"/>
+                                <field name="survey_in_progress_count" readonly="1"/>
+                            </group>
+                            <group string="Información Adicional" name="survey_extra_info">
+                                <field name="last_survey_date" readonly="1"/>
+                                <field name="survey_average_score" readonly="1" 
+                                       widget="percentage"
+                                       invisible="survey_average_score == 0"/>
+                            </group>
+                        </group>
+                        
+                        <separator string="Participaciones en Encuestas"/>
+                        
+                        <!-- Información de resumen -->
+                        <div class="alert alert-info text-center" role="alert">
+                            <p class="mb-2"><strong>📊 Resumen de Encuestas</strong></p>
+                            <p class="mb-0">
+                                Este contacto tiene <strong><field name="survey_count" readonly="1" nolabel="1"/> encuestas</strong> registradas
+                                (<field name="survey_completed_count" readonly="1" nolabel="1"/> completadas,
+                                <field name="survey_in_progress_count" readonly="1" nolabel="1"/> en proceso)
+                            </p>
+                        </div>
+                        
+                        <!-- Instrucciones -->
+                        <div class="alert alert-secondary" role="alert">
+                            <p><strong>💡 Cómo ver el detalle de las encuestas:</strong></p>
+                            <ul class="mb-0">
+                                <li>Usa los <strong>botones inteligentes</strong> en la parte superior del formulario</li>
+                                <li>Haz clic en el botón "Encuestas" o "Completadas" arriba para ver el listado completo</li>
+                            </ul>
+                        </div>
+                    </div><!-- Fin del div cuando hay encuestas -->
                 </page>
             </xpath>
 
