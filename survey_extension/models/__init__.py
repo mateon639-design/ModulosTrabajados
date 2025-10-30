@@ -19,3 +19,4 @@ from . import survey_user_input_extensions
 from . import survey_ranking_dashboard
 from . import survey_device
 from . import survey_region
+from . import survey_wpm_question

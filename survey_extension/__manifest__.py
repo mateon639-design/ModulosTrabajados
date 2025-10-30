@@ -61,6 +61,11 @@
         "views/survey_templates.xml",
         "views/survey_scoring_templates.xml",
         "views/survey_calificacion_average_views.xml",
+        "views/survey_question_inherit_views.xml",
+        
+        # --- Vistas WPM (Palabras Por Minuto) ---
+        "views/survey_wpm_question_views.xml",
+        "views/survey_wpm_templates.xml",
 
         # --- Menús (siempre al final) ---
         "views/survey_extension_menu.xml",
@@ -76,6 +81,7 @@
         "survey.survey_assets": [
             "survey_extension/static/src/js/survey_conditional_questions.js",
             "survey_extension/static/src/js/survey_answer_attachments.js",
+            "survey_extension/static/src/js/survey_wpm_questions.js",
             "survey_extension/static/src/scss/survey_extension.scss",
         ],
         # Backend (vistas Odoo / dashboards)
