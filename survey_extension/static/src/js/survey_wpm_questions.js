@@ -1,495 +1,490 @@
 /** @odoo-module **/
 /**
- * Archivo: survey_wpm_questions.js
- * Propósito: Lógica JavaScript para preguntas de tipo WPM (Palabras Por Minuto)
- * 
- * Este archivo maneja:
- * 1. Temporizador para medir tiempo de lectura/escritura
- * 2. Cálculo en tiempo real de WPM
- * 3. Clasificación de velocidad (lento/promedio/rápido)
- * 4. Validación de límites de tiempo
- * 5. Prevención de copiar/pegar en modo escritura
+ * Lógica frontend para preguntas WPM (lectura y escritura).
+ * Calcula palabras por minuto y sincroniza los datos con el backend.
  */
 
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { _t } from "@web/core/l10n/translation";
 
-// ============================================================================
-// WIDGET: Pregunta WPM de Lectura
-// ============================================================================
+const PAD_TWO = (value) => value.toString().padStart(2, "0");
+
+const parseBoolean = (value) => {
+    if (typeof value === "boolean") {
+        return value;
+    }
+    if (typeof value === "number") {
+        return !!value;
+    }
+    if (typeof value === "string") {
+        const normalized = value.trim().toLowerCase();
+        return normalized === "true" || normalized === "1";
+    }
+    return false;
+};
+
+const formatDuration = (seconds) => {
+    if (!seconds || seconds < 0) {
+        return "00:00";
+    }
+    const total = Math.floor(seconds);
+    const mins = Math.floor(total / 60);
+    const secs = total % 60;
+    return `${PAD_TWO(mins)}:${PAD_TWO(secs)}`;
+};
+
+const countWords = (text) => {
+    if (!text) {
+        return 0;
+    }
+    const tokens = text.trim().split(/\s+/);
+    return tokens.filter(Boolean).length;
+};
+
+const ensureReadingQuestionStart = ($question) => {
+    const $startInput = $question.find(".o_wpm_start_timestamp");
+    let startValue = $startInput.val();
+    let startDate = startValue ? new Date(startValue) : null;
+
+    if (!startValue || Number.isNaN(startDate?.getTime())) {
+        startDate = new Date();
+        $startInput.val(startDate.toISOString());
+    }
+
+    if (!$question.data("wpm-start-ms")) {
+        $question.data("wpm-start-ms", startDate.getTime());
+    }
+
+    return startDate;
+};
+
+const finalizeReadingQuestion = ($question) => {
+    const wordCount = parseInt($question.data("word-count"), 10) || 0;
+    const startTime = ensureReadingQuestionStart($question);
+    if (!startTime || Number.isNaN(startTime.getTime())) {
+            console.warn("WPM reading timestamp inválido", $question.data("question-id"));
+        return;
+    }
+    const endTime = new Date();
+    const elapsedSeconds = Math.max((endTime - startTime) / 1000, 0);
+    const wpm = elapsedSeconds > 0 ? (wordCount / elapsedSeconds) * 60 : 0;
+
+    $question.find(".o_wpm_completed").val("1");
+    $question.find(".o_wpm_time_input").val(elapsedSeconds.toFixed(2));
+    $question.find(".o_wpm_word_count_input").val(wordCount);
+    $question.find(".o_wpm_score_input").val(wpm.toFixed(2));
+    $question.find(".o_wpm_end_timestamp").val(endTime.toISOString());
+    $question.find(".o_wpm_answer_flag").val("1");
+
+        console.debug("WPM lectura calculado", {
+            questionId: $question.data("question-id"),
+            wordCount,
+            elapsedSeconds,
+            wpm,
+        });
+};
+
+const finalizeTypingQuestion = ($question) => {
+    const $textarea = $question.find(".o_wpm_typing_area");
+    const rawText = $textarea.val() || "";
+    const trimmed = rawText.trim();
+
+    const $startInput = $question.find(".o_wpm_start_timestamp");
+    let startTime = null;
+    if ($startInput.val()) {
+        const parsed = new Date($startInput.val());
+        startTime = Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+    if (!startTime && trimmed) {
+        startTime = new Date();
+        $startInput.val(startTime.toISOString());
+    }
+
+    const wordCount = countWords(trimmed);
+    const endTime = new Date();
+    const elapsedSeconds = startTime ? Math.max((endTime - startTime) / 1000, 0) : 0;
+    const wpm = elapsedSeconds > 0 ? (wordCount / elapsedSeconds) * 60 : 0;
+
+    const completed = Boolean(trimmed);
+
+    $question.find(".o_wpm_word_count_input").val(wordCount);
+    $question.find(".o_wpm_typed_text_input").val(rawText);
+
+    if (completed) {
+        $question.find(".o_wpm_completed").val("1");
+        $question.find(".o_wpm_time_input").val(elapsedSeconds.toFixed(2));
+        $question.find(".o_wpm_score_input").val(wpm.toFixed(2));
+        $question.find(".o_wpm_end_timestamp").val(endTime.toISOString());
+        $question.find(".o_wpm_answer_flag").val("1");
+            console.debug("WPM typing calculado", {
+                questionId: $question.data("question-id"),
+                wordCount,
+                elapsedSeconds,
+                wpm,
+            });
+    } else {
+        $question.find(".o_wpm_completed").val("0");
+        $question.find(".o_wpm_time_input").val("");
+        $question.find(".o_wpm_score_input").val("");
+        $question.find(".o_wpm_end_timestamp").val("");
+        $question.find(".o_wpm_answer_flag").val("");
+        $question.find(".o_wpm_start_timestamp").val("");
+    }
+
+    return {
+        completed,
+        wordCount,
+        elapsedSeconds,
+        wpm,
+        rawText,
+    };
+};
+
+// Lectura -------------------------------------------------------------------
 
 publicWidget.registry.SurveyWPMReading = publicWidget.Widget.extend({
-    selector: '.o_survey_question_wpm_reading',
-    events: {
-        'click .o_wpm_start_btn': '_onStartReading',
-        'click .o_wpm_finish_btn': '_onFinishReading',
-    },
+    selector: ".o_survey_question_wpm_reading",
 
-    /**
-     * Inicialización del widget
-     */
-    start: function () {
-        this._super.apply(this, arguments);
-        
-        // Datos de la pregunta
-        this.questionId = this.$el.data('question-id');
-        this.wordCount = this.$el.data('word-count') || 0;
-        this.showTimer = this.$el.data('show-timer');
-        this.minTime = this.$el.data('min-time') || 0;
-        this.maxTime = this.$el.data('max-time') || 0;
-        
-        // Estado del temporizador
-        this.startTime = null;
-        this.endTime = null;
-        this.timerInterval = null;
-        this.elapsedSeconds = 0;
-        
-        // Referencias a elementos
-        this.$startScreen = this.$('.o_wpm_start_screen');
-        this.$readingScreen = this.$('.o_wpm_reading_screen');
-        this.$resultScreen = this.$('.o_wpm_result_screen');
-        this.$timerDisplay = this.$('.o_wpm_timer_display');
-        this.$currentWPM = this.$('.o_wpm_current_wpm');
-        
-        return this._super.apply(this, arguments);
-    },
-
-    /**
-     * Limpiar al destruir
-     */
-    destroy: function () {
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-        }
-        this._super.apply(this, arguments);
-    },
-
-    /**
-     * Evento: Comenzar lectura
-     */
-    _onStartReading: function (ev) {
-        ev.preventDefault();
-        
-        // Registrar tiempo de inicio
-        this.startTime = new Date();
-        this.elapsedSeconds = 0;
-        
-        // Cambiar interfaz
-        this.$startScreen.hide();
-        this.$readingScreen.show();
-        
-        // Iniciar temporizador
-        this._startTimer();
-        
-        // Guardar timestamp
-        this.$('.o_wpm_start_timestamp').val(this.startTime.toISOString());
-    },
-
-    /**
-     * Evento: Finalizar lectura
-     */
-    _onFinishReading: function (ev) {
-        ev.preventDefault();
-        
-        // Registrar tiempo de fin
-        this.endTime = new Date();
-        
-        // Detener temporizador
-        this._stopTimer();
-        
-        // Calcular resultados
-        const timeInSeconds = (this.endTime - this.startTime) / 1000;
-        const wpm = this._calculateWPM(this.wordCount, timeInSeconds);
-        const classification = this._classifyWPM(wpm);
-        
-        // Validar límites de tiempo
-        if (this.minTime > 0 && timeInSeconds < this.minTime) {
-            this._showWarning(_t('Advertencia: El tiempo es muy corto. ¿Realmente leíste todo el texto?'));
-        }
-        
-        if (this.maxTime > 0 && timeInSeconds > this.maxTime) {
-            this._showWarning(_t('Has excedido el tiempo máximo permitido.'));
-        }
-        
-        // Guardar datos en campos ocultos
-        this.$('.o_wpm_completed').val('1');  // Marcar como completada
-        this.$('.o_wpm_time_input').val(timeInSeconds.toFixed(2));
-        this.$('.o_wpm_word_count_input').val(this.wordCount);
-        this.$('.o_wpm_score_input').val(wpm.toFixed(2));
-        this.$('.o_wpm_end_timestamp').val(this.endTime.toISOString());
-        
-        // Mostrar resultados
-        this._showResults(wpm, timeInSeconds, classification);
-    },
-
-    /**
-     * Inicia el temporizador
-     */
-    _startTimer: function () {
-        const self = this;
-        
-        this.timerInterval = setInterval(function () {
-            self.elapsedSeconds++;
-            
-            // Actualizar display del temporizador
-            if (self.showTimer) {
-                self.$timerDisplay.text(self._formatTime(self.elapsedSeconds));
+    start() {
+        const result = this._super.apply(this, arguments);
+        return Promise.resolve(result).then(() => {
+            this.questionId = this.$el.data("question-id");
+            this.wordCount = this.$el.data("word-count") || 0;
+            ensureReadingQuestionStart(this.$el);
+            const $wordInput = this.$(".o_wpm_word_count_input");
+            if (!$wordInput.val()) {
+                $wordInput.val(this.wordCount);
             }
-            
-            // Actualizar WPM en tiempo real
-            const currentWPM = self._calculateWPM(self.wordCount, self.elapsedSeconds);
-            self.$currentWPM.text(currentWPM.toFixed(0));
-        }, 1000);
-    },
-
-    /**
-     * Detiene el temporizador
-     */
-    _stopTimer: function () {
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-            this.timerInterval = null;
-        }
-    },
-
-    /**
-     * Calcula WPM (Palabras Por Minuto)
-     * Formula: WPM = (palabras / segundos) * 60
-     */
-    _calculateWPM: function (words, seconds) {
-        if (seconds === 0) return 0;
-        return (words / seconds) * 60;
-    },
-
-    /**
-     * Formatea segundos a MM:SS
-     */
-    _formatTime: function (totalSeconds) {
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
-        return minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
-    },
-
-    /**
-     * Clasifica WPM según velocidad
-     */
-    _classifyWPM: function (wpm) {
-        // Umbrales predeterminados (se pueden personalizar desde Python)
-        if (wpm < 150) return { label: 'Lento', class: 'bg-danger' };
-        if (wpm < 250) return { label: 'Promedio', class: 'bg-warning' };
-        if (wpm < 350) return { label: 'Rápido', class: 'bg-success' };
-        return { label: 'Excepcional', class: 'bg-primary' };
-    },
-
-    /**
-     * Muestra los resultados finales
-     */
-    _showResults: function (wpm, timeInSeconds, classification) {
-        // Ocultar pantalla de lectura
-        this.$readingScreen.hide();
-        
-        // Actualizar datos del resultado
-        this.$('.o_wpm_final_score').text(wpm.toFixed(0));
-        this.$('.o_wpm_final_time').text(this._formatTime(Math.round(timeInSeconds)));
-        this.$('.o_wpm_classification_badge')
-            .text(classification.label)
-            .removeClass('bg-danger bg-warning bg-success bg-primary')
-            .addClass(classification.class);
-        
-        // Mostrar pantalla de resultado
-        this.$resultScreen.fadeIn();
-    },
-
-    /**
-     * Muestra advertencia
-     */
-    _showWarning: function (message) {
-        // Crear alerta temporal
-        const $warning = $('<div class="alert alert-warning alert-dismissible fade show" role="alert">')
-            .html('<i class="fa fa-exclamation-triangle me-2"></i>' + message +
-                  '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>');
-        
-        this.$readingScreen.prepend($warning);
-        
-        // Auto-ocultar después de 5 segundos
-        setTimeout(function () {
-            $warning.fadeOut(function () { $(this).remove(); });
-        }, 5000);
+            this.$(".o_wpm_completed").val("0");
+            this.$(".o_wpm_answer_flag").val("");
+        });
     },
 });
 
-// ============================================================================
-// WIDGET: Pregunta WPM de Escritura
-// ============================================================================
+// Escritura -----------------------------------------------------------------
 
 publicWidget.registry.SurveyWPMTyping = publicWidget.Widget.extend({
-    selector: '.o_survey_question_wpm_typing',
+    selector: ".o_survey_question_wpm_typing",
+
     events: {
-        'input .o_wpm_typing_area': '_onTyping',
-        'paste .o_wpm_typing_area': '_onPaste',
-        'click .o_wpm_typing_finish_btn': '_onFinishTyping',
+        "input .o_wpm_typing_area": "_onTypingInput",
+        "paste .o_wpm_typing_area": "_onPaste",
+        "click .o_wpm_typing_finish_btn": "_onFinish",
     },
 
-    /**
-     * Inicialización
-     */
-    start: function () {
-        this._super.apply(this, arguments);
-        
-        // Datos de la pregunta
-        this.questionId = this.$el.data('question-id');
-        this.showTimer = this.$el.data('show-timer');
-        this.allowPaste = this.$el.data('allow-paste');
-        this.minTime = this.$el.data('min-time') || 0;
-        this.maxTime = this.$el.data('max-time') || 0;
-        
-        // Estado
-        this.startTime = null;
-        this.endTime = null;
-        this.timerInterval = null;
-        this.elapsedSeconds = 0;
-        this.hasStarted = false;
-        
-        // Referencias
-        this.$textarea = this.$('.o_wpm_typing_area');
-        this.$finishBtn = this.$('.o_wpm_typing_finish_btn');
-        this.$resultScreen = this.$('.o_wpm_result_screen');
-        this.$wordCountDisplay = this.$('.o_wpm_word_count_display');
-        this.$charCountDisplay = this.$('.o_wpm_char_count_display');
-        this.$timerDisplay = this.$('.o_wpm_timer_display');
-        this.$currentWPM = this.$('.o_wpm_current_wpm');
-        
+    start() {
+        const result = this._super.apply(this, arguments);
+        return Promise.resolve(result).then(() => {
+            this.$textarea = this.$(".o_wpm_typing_area");
+            this.$finishBtn = this.$(".o_wpm_typing_finish_btn");
+            this.$timerDisplay = this.$(".o_wpm_timer_display");
+            this.$wordCountDisplay = this.$(".o_wpm_word_count_display");
+            this.$charCountDisplay = this.$(".o_wpm_char_count_display");
+            this.$currentWpmDisplay = this.$(".o_wpm_current_wpm");
+            this.$resultScreen = this.$(".o_wpm_result_screen");
+            this.$finalScore = this.$(".o_wpm_final_score");
+            this.$finalWords = this.$(".o_wpm_final_words");
+            this.$classificationBadge = this.$(".o_wpm_classification_badge");
+
+            this.showTimer = parseBoolean(this.$el.data("show-timer"));
+            this.allowPaste = parseBoolean(this.$el.data("allow-paste"));
+            this.thresholds = {
+                slow: parseInt(this.$el.data("slow-threshold"), 10) || 0,
+                average: parseInt(this.$el.data("average-threshold"), 10) || 0,
+                fast: parseInt(this.$el.data("fast-threshold"), 10) || 0,
+            };
+
+            this.startTime = null;
+            this.latestWordCount = 0;
+            this.completed = false;
+            this._timerHandle = null;
+
+            this.$finishBtn.prop("disabled", true);
+            this.$(".o_wpm_completed").val("0");
+            this.$(".o_wpm_answer_flag").val("");
+
+            const completed = this.$(".o_wpm_completed").val() === "1";
+            if (completed) {
+                this._restorePreviousResult();
+            }
+        });
+    },
+
+    destroy() {
+        if (this._timerHandle) {
+            clearInterval(this._timerHandle);
+        }
         return this._super.apply(this, arguments);
     },
 
-    /**
-     * Limpiar
-     */
-    destroy: function () {
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
+    _restorePreviousResult() {
+        const wordCount = parseInt(this.$(".o_wpm_word_count_input").val(), 10) || 0;
+        const elapsedSeconds = parseFloat(this.$(".o_wpm_time_input").val()) || 0;
+    const parsedWpm = parseFloat(this.$(".o_wpm_score_input").val());
+    const wpm = Number.isFinite(parsedWpm) ? parsedWpm : 0;
+        const rawText = this.$(".o_wpm_typed_text_input").val() || "";
+
+        this.$textarea.val(rawText);
+        this.$wordCountDisplay.text(wordCount);
+        this.$charCountDisplay.text(rawText.length);
+        this.$currentWpmDisplay.text(wpm.toFixed(2));
+        if (this.showTimer) {
+            this.$timerDisplay.text(formatDuration(elapsedSeconds));
         }
-        this._super.apply(this, arguments);
+
+        this._showResult({
+            completed: true,
+            wordCount,
+            elapsedSeconds,
+            wpm,
+            rawText,
+        });
+        this.completed = true;
+        this.$finishBtn.prop("disabled", false).removeClass("btn-success").addClass("btn-secondary");
     },
 
-    /**
-     * Evento: Usuario está escribiendo
-     */
-    _onTyping: function (ev) {
-        const text = this.$textarea.val();
-        
-        // Si es la primera vez que escribe, iniciar temporizador
-        if (!this.hasStarted && text.trim().length > 0) {
-            this._startTyping();
-        }
-        
-        // Actualizar contadores en tiempo real
-        this._updateCounters(text);
-    },
-
-    /**
-     * Evento: Intento de pegar texto
-     */
-    _onPaste: function (ev) {
+    _onPaste(ev) {
         if (!this.allowPaste) {
             ev.preventDefault();
-            this._showWarning(_t('Copiar y pegar no está permitido en esta pregunta.'));
-            return false;
+            ev.stopPropagation();
         }
     },
 
-    /**
-     * Evento: Finalizar escritura
-     */
-    _onFinishTyping: function (ev) {
-        ev.preventDefault();
-        
-        const text = this.$textarea.val().trim();
-        
-        if (text.length === 0) {
-            this._showWarning(_t('Debes escribir al menos una palabra antes de finalizar.'));
+    _onTypingInput() {
+        const rawText = this.$textarea.val() || "";
+        const trimmed = rawText.trim();
+
+        if (this.completed) {
+            this._resetMeasurementState();
+        }
+
+        if (!trimmed) {
+            this.latestWordCount = 0;
+            this.$wordCountDisplay.text("0");
+            this.$charCountDisplay.text(rawText.length);
+            this.$currentWpmDisplay.text("0");
+            if (this.showTimer) {
+                this.$timerDisplay.text("00:00");
+            }
+            this.$finishBtn.prop("disabled", true);
+            this.$(".o_wpm_word_count_input").val(0);
+            this.$(".o_wpm_typed_text_input").val("");
             return;
         }
-        
-        // Registrar tiempo de fin
-        this.endTime = new Date();
-        
-        // Detener temporizador
-        this._stopTimer();
-        
-        // Contar palabras
-        const wordCount = this._countWords(text);
-        const timeInSeconds = (this.endTime - this.startTime) / 1000;
-        const wpm = this._calculateWPM(wordCount, timeInSeconds);
-        const classification = this._classifyWPM(wpm);
-        
-        // Validar límites
-        if (this.minTime > 0 && timeInSeconds < this.minTime) {
-            this._showWarning(_t('Advertencia: El tiempo es muy corto.'));
-        }
-        
-        if (this.maxTime > 0 && timeInSeconds > this.maxTime) {
-            this._showWarning(_t('Has excedido el tiempo máximo permitido.'));
-        }
-        
-        // Guardar datos
-        this.$('.o_wpm_completed').val('1');  // Marcar como completada
-        this.$('.o_wpm_time_input').val(timeInSeconds.toFixed(2));
-        this.$('.o_wpm_word_count_input').val(wordCount);
-        this.$('.o_wpm_score_input').val(wpm.toFixed(2));
-        this.$('.o_wpm_end_timestamp').val(this.endTime.toISOString());
-        
-        // Deshabilitar textarea
-        this.$textarea.prop('disabled', true);
-        this.$finishBtn.prop('disabled', true);
-        
-        // Mostrar resultados
-        this._showResults(wpm, wordCount, classification);
-    },
 
-    /**
-     * Inicia el temporizador de escritura
-     */
-    _startTyping: function () {
-        this.hasStarted = true;
-        this.startTime = new Date();
-        this.elapsedSeconds = 0;
-        
-        // Habilitar botón de finalizar
-        this.$finishBtn.prop('disabled', false);
-        
-        // Guardar timestamp de inicio
-        this.$('.o_wpm_start_timestamp').val(this.startTime.toISOString());
-        
-        // Iniciar temporizador
-        const self = this;
-        this.timerInterval = setInterval(function () {
-            self.elapsedSeconds++;
-            
-            if (self.showTimer) {
-                self.$timerDisplay.text(self._formatTime(self.elapsedSeconds));
-            }
-            
-            // Actualizar WPM en tiempo real
-            const text = self.$textarea.val();
-            const wordCount = self._countWords(text);
-            const currentWPM = self._calculateWPM(wordCount, self.elapsedSeconds);
-            self.$currentWPM.text(currentWPM.toFixed(0));
-        }, 1000);
-    },
-
-    /**
-     * Detiene el temporizador
-     */
-    _stopTimer: function () {
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-            this.timerInterval = null;
+        if (!this.startTime) {
+            this.startTime = new Date();
+            this.$(".o_wpm_start_timestamp").val(this.startTime.toISOString());
+            this.$finishBtn.prop("disabled", false);
+            this._startTimerTick();
         }
-    },
 
-    /**
-     * Actualiza contadores de palabras y caracteres
-     */
-    _updateCounters: function (text) {
-        const wordCount = this._countWords(text);
-        const charCount = text.length;
-        
+        const wordCount = countWords(trimmed);
+        this.latestWordCount = wordCount;
         this.$wordCountDisplay.text(wordCount);
-        this.$charCountDisplay.text(charCount);
+        this.$charCountDisplay.text(rawText.length);
+        this.$(".o_wpm_word_count_input").val(wordCount);
+        this.$(".o_wpm_typed_text_input").val(rawText);
+
+        this._refreshRunningMetrics();
     },
 
-    /**
-     * Cuenta palabras en un texto
-     */
-    _countWords: function (text) {
-        if (!text || text.trim().length === 0) return 0;
-        
-        // Usar regex para contar palabras (similar a Python)
-        const words = text.trim().match(/\b\w+\b/g);
-        return words ? words.length : 0;
+    _startTimerTick() {
+        if (this._timerHandle) {
+            clearInterval(this._timerHandle);
+        }
+        if (!this.showTimer) {
+            return;
+        }
+        this._timerHandle = setInterval(() => {
+            this._refreshRunningMetrics();
+        }, 300);
     },
 
-    /**
-     * Calcula WPM
-     */
-    _calculateWPM: function (words, seconds) {
-        if (seconds === 0) return 0;
-        return (words / seconds) * 60;
+    _refreshRunningMetrics() {
+        if (!this.startTime) {
+            return;
+        }
+        const seconds = Math.max((Date.now() - this.startTime.getTime()) / 1000, 0);
+        if (this.showTimer) {
+            this.$timerDisplay.text(formatDuration(seconds));
+        }
+        const wpm = seconds > 0 ? (this.latestWordCount / seconds) * 60 : 0;
+        this.$currentWpmDisplay.text(wpm > 0 ? wpm.toFixed(2) : "0");
     },
 
-    /**
-     * Formatea tiempo
-     */
-    _formatTime: function (totalSeconds) {
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
-        return minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+    _resetMeasurementState() {
+        this.completed = false;
+        this.startTime = null;
+        this.latestWordCount = 0;
+        if (this._timerHandle) {
+            clearInterval(this._timerHandle);
+            this._timerHandle = null;
+        }
+        this.$(".o_wpm_completed").val("0");
+        this.$(".o_wpm_time_input").val("");
+        this.$(".o_wpm_score_input").val("");
+        this.$(".o_wpm_end_timestamp").val("");
+        this.$(".o_wpm_start_timestamp").val("");
+        this.$(".o_wpm_answer_flag").val("");
+        this.$(".o_wpm_typed_text_input").val("");
+        this.$(".o_wpm_word_count_input").val(0);
+        this.$resultScreen.hide();
+        this.$finishBtn.prop("disabled", true)
+            .removeClass("btn-secondary")
+            .addClass("btn-success");
+        this.$wordCountDisplay.text("0");
+        this.$currentWpmDisplay.text("0");
+        this.$charCountDisplay.text(this.$textarea.val().length);
+        if (this.showTimer) {
+            this.$timerDisplay.text("00:00");
+        }
     },
 
-    /**
-     * Clasifica WPM
-     */
-    _classifyWPM: function (wpm) {
-        if (wpm < 150) return { label: 'Lento', class: 'bg-danger' };
-        if (wpm < 250) return { label: 'Promedio', class: 'bg-warning' };
-        if (wpm < 350) return { label: 'Rápido', class: 'bg-success' };
-        return { label: 'Excepcional', class: 'bg-primary' };
+    _onFinish(ev) {
+        ev.preventDefault();
+        const result = finalizeTypingQuestion(this.$el);
+        if (!result || !result.completed) {
+            return;
+        }
+            console.debug("WPM typing finalizado", {
+                questionId: this.$el.data("question-id"),
+                result,
+            });
+        if (this._timerHandle) {
+            clearInterval(this._timerHandle);
+            this._timerHandle = null;
+        }
+        this.completed = true;
+        this.startTime = null;
+        this.latestWordCount = result.wordCount;
+        this._showResult(result);
+        this.$finishBtn.prop("disabled", false).removeClass("btn-success").addClass("btn-secondary");
     },
 
-    /**
-     * Muestra resultados
-     */
-    _showResults: function (wpm, wordCount, classification) {
-        this.$('.o_wpm_final_score').text(wpm.toFixed(0));
-        this.$('.o_wpm_final_words').text(wordCount);
-        this.$('.o_wpm_classification_badge')
+    _showResult(result) {
+        const { elapsedSeconds, wordCount } = result;
+        const safeWpm = Number.isFinite(result.wpm) ? result.wpm : 0;
+        this.$finalScore.text(safeWpm ? safeWpm.toFixed(2) : "0");
+        this.$finalWords.text(wordCount);
+        if (this.showTimer) {
+            this.$timerDisplay.text(formatDuration(elapsedSeconds));
+        }
+
+        const classification = this._classifyWpm(safeWpm);
+        this.$classificationBadge
             .text(classification.label)
-            .removeClass('bg-danger bg-warning bg-success bg-primary')
-            .addClass(classification.class);
-        
-        this.$resultScreen.fadeIn();
+            .removeClass("bg-danger bg-warning bg-info bg-success bg-secondary")
+            .addClass(classification.badgeClass);
+
+        this.$resultScreen.show();
     },
 
-    /**
-     * Muestra advertencia
-     */
-    _showWarning: function (message) {
-        const $warning = $('<div class="alert alert-warning alert-dismissible fade show" role="alert">')
-            .html('<i class="fa fa-exclamation-triangle me-2"></i>' + message +
-                  '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>');
-        
-        this.$textarea.before($warning);
-        
-        setTimeout(function () {
-            $warning.fadeOut(function () { $(this).remove(); });
-        }, 5000);
+    _classifyWpm(wpm) {
+        const labels = {
+            slow: { label: _t("Lento"), badgeClass: "bg-danger" },
+            average: { label: _t("Promedio"), badgeClass: "bg-warning" },
+            fast: { label: _t("Rápido"), badgeClass: "bg-info" },
+            exceptional: { label: _t("Excepcional"), badgeClass: "bg-success" },
+        };
+
+        if (!wpm || wpm <= 0) {
+            return labels.slow;
+        }
+        if (this.thresholds.slow && wpm < this.thresholds.slow) {
+            return labels.slow;
+        }
+        if (this.thresholds.average && wpm < this.thresholds.average) {
+            return labels.average;
+        }
+        if (this.thresholds.fast && wpm < this.thresholds.fast) {
+            return labels.fast;
+        }
+        return labels.exceptional;
     },
 });
 
-// Registrar extensión del SurveyFormWidget para procesar datos WPM
 const SurveyFormWidget = publicWidget.registry.SurveyFormWidget;
 
 if (SurveyFormWidget) {
     SurveyFormWidget.include({
-        /**
-         * Validación antes de enviar el formulario
-         */
-        _prepareSubmitValues: function (formData, params) {
+        start() {
             const result = this._super.apply(this, arguments);
-            
-            // Validar que las preguntas WPM estén completadas
-            this.$('.o_survey_question_wpm_reading, .o_survey_question_wpm_typing').each(function () {
-                const $question = $(this);
-                const timeInput = $question.find('.o_wpm_time_input').val();
-                
-                if (!timeInput || parseFloat(timeInput) === 0) {
-                    // Marcar como inválida si no se completó
-                    $question.addClass('o_survey_question_error');
+            return Promise.resolve(result).then(() => {
+                this._initWpmQuestions();
+            });
+        },
+
+        _onNextScreenDone() {
+            const result = this._super.apply(this, arguments);
+            this._initWpmQuestions();
+            return result;
+        },
+
+        _onSubmit(ev) {
+            this.$(".o_survey_question_wpm_reading:visible").each((idx, element) => {
+                finalizeReadingQuestion($(element));
+            });
+
+            this.$(".o_survey_question_wpm_typing:visible").each((idx, element) => {
+                finalizeTypingQuestion($(element));
+            });
+
+            return this._super.apply(this, arguments);
+        },
+
+        _prepareSubmitValues(formData, params) {
+            this._super.apply(this, arguments);
+
+            const grouped = {};
+            formData.forEach((value, key) => {
+                const match = key && key.match(/^([0-9]+)_wpm_(.+)$/);
+                if (!match) {
+                    return;
+                }
+                const questionId = match[1];
+                const suffix = match[2];
+                grouped[questionId] = grouped[questionId] || {};
+                grouped[questionId][`wpm_${suffix}`] = value;
+            });
+
+            Object.entries(grouped).forEach(([questionId, data]) => {
+                if (!Object.keys(data).length) {
+                    return;
+                }
+                const existing = params[questionId];
+                if (!existing) {
+                    params[questionId] = data;
+                } else if (Array.isArray(existing)) {
+                    existing.push(data);
+                } else if (typeof existing === "object") {
+                    params[questionId] = Object.assign({}, existing, data);
+                } else {
+                    params[questionId] = [existing, data];
                 }
             });
-            
-            return result;
+        },
+
+        _initWpmQuestions() {
+            this.$(".o_survey_question_wpm_reading").each((idx, element) => {
+                const $question = $(element);
+                const startDate = ensureReadingQuestionStart($question);
+                if (!startDate) {
+                    return;
+                }
+                const completed = $question.find(".o_wpm_completed").val() === "1";
+                if (!completed) {
+                    const wordCount = parseInt($question.data("word-count"), 10) || 0;
+                    const $wordInput = $question.find(".o_wpm_word_count_input");
+                    if (!$wordInput.val()) {
+                        $wordInput.val(wordCount);
+                    }
+                    $question.find(".o_wpm_answer_flag").val("");
+                    $question.find(".o_wpm_time_input").val("");
+                    $question.find(".o_wpm_score_input").val("");
+                    $question.find(".o_wpm_end_timestamp").val("");
+                }
+            });
         },
     });
 }

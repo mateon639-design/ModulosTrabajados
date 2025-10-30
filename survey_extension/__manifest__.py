@@ -66,6 +66,7 @@
         # --- Vistas WPM (Palabras Por Minuto) ---
         "views/survey_wpm_question_views.xml",
         "views/survey_wpm_templates.xml",
+        "views/survey_user_input_line_views.xml",
 
         # --- Menús (siempre al final) ---
         "views/survey_extension_menu.xml",

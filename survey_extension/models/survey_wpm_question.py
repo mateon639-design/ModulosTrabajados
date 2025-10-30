@@ -175,6 +175,46 @@ class SurveyQuestion(models.Model):
                         _("El tiempo mínimo no puede ser mayor que el tiempo máximo.")
                     )
 
+    # ========================================================================
+    # VALIDACIÓN DE RESPUESTAS
+    # ========================================================================
+    
+    def validate_question(self, answer, comment=None):
+        """
+        Override para validar respuestas de preguntas WPM.
+        
+        Para preguntas wpm_reading y wpm_typing, 'answer' es un diccionario con:
+        - wpm_completed: '1' o '0'
+        - wpm_time: tiempo en segundos (string)
+        - wpm_words: cantidad de palabras (string)
+        - etc.
+        """
+        self.ensure_one()
+        
+        if self.question_type in ('wpm_reading', 'wpm_typing'):
+            return self._validate_wpm(answer, comment)
+        else:
+            return super().validate_question(answer, comment)
+    
+    def _validate_wpm(self, answer, comment=None):
+        """
+        Validación específica para preguntas WPM.
+        
+        Las preguntas WPM se calculan automáticamente, por lo que:
+        - Si no es obligatoria, siempre es válida
+        - Si es obligatoria y no hay datos, permitir envío (se calculará automáticamente)
+        
+        Retorna un diccionario: {question.id: error_message} si hay error
+        o {} si todo está correcto.
+        """
+        self.ensure_one()
+        
+        # Las preguntas WPM se procesan automáticamente en el JavaScript
+        # No validamos aquí porque el cálculo se hace en el cliente antes de enviar
+        # Si llegamos aquí sin datos, es porque el JS no se ejecutó, pero no bloqueamos
+        
+        return {}
+
 
 # ============================================================================
 # EXTENSIÓN: Línea de Respuesta - Almacenar resultados WPM

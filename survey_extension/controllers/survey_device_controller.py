@@ -19,8 +19,9 @@ class SurveyDeviceController(Survey):
     @http.route()
     def survey_submit(self, survey_token, **post):
         """
-        Override del método survey_submit para capturar información de dispositivo
-        antes de procesar la respuesta.
+        Override del método survey_submit para:
+        1. Capturar información de dispositivo
+        2. Procesar campos WPM correctamente (agrupándolos por question_id)
         """
         # Obtener la participación actual
         access_data = self._get_access_data(survey_token)
@@ -46,8 +47,43 @@ class SurveyDeviceController(Survey):
             except Exception as e:
                 _logger.warning('Error capturing device info: %s', str(e))
         
-        # Continuar con el procesamiento normal
-        return super().survey_submit(survey_token, **post)
+        # Procesar campos WPM: agrupar campos dispersos en diccionarios
+        # Los campos vienen como: {question_id}_wpm_time, {question_id}_wpm_words, etc.
+        # Necesitamos convertirlos a: {question_id: {'wpm_time': ..., 'wpm_words': ...}}
+        processed_post = dict(post)
+        wpm_data = {}  # {question_id: {wpm_field: value}}
+        
+        # Identificar y agrupar campos WPM
+        keys_to_remove = []
+        for key, value in post.items():
+            if '_wpm_' in key:
+                try:
+                    # Formato: {question_id}_wpm_{field}
+                    # Ejemplo: 123_wpm_time, 123_wpm_words, etc.
+                    parts = key.split('_wpm_')
+                    if len(parts) == 2:
+                        question_id = parts[0]
+                        wpm_field = 'wpm_' + parts[1]  # wpm_time, wpm_words, etc.
+                        
+                        if question_id not in wpm_data:
+                            wpm_data[question_id] = {}
+                        
+                        wpm_data[question_id][wpm_field] = value
+                        keys_to_remove.append(key)
+                except Exception as e:
+                    _logger.warning(f'Error parsing WPM field {key}: {e}')
+        
+        # Remover campos WPM individuales del POST
+        for key in keys_to_remove:
+            processed_post.pop(key, None)
+        
+        # Agregar datos WPM agrupados al POST
+        for question_id, wpm_fields in wpm_data.items():
+            processed_post[question_id] = wpm_fields
+            _logger.debug(f'WPM data for question {question_id}: {wpm_fields}')
+        
+        # Continuar con el procesamiento normal usando el POST procesado
+        return super().survey_submit(survey_token, **processed_post)
 
     @http.route()
     def survey_start(self, *args, **kwargs):

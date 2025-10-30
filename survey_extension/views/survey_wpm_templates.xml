@@ -13,153 +13,56 @@ Define cómo se verán las preguntas WPM en la interfaz del usuario final
     <!-- ================================================================== -->
     
     <template id="survey_question_wpm_reading" name="Survey Question: WPM Reading">
-        
-        <!-- Contenedor principal de la pregunta WPM -->
-        <div class="js_question-wrapper o_survey_question_wpm_reading"
-             t-att-data-question-id="question.id"
-             t-att-data-word-count="question.wpm_word_count"
-             t-att-data-show-timer="question.wpm_show_timer"
-             t-att-data-min-time="question.wpm_min_time or 0"
-             t-att-data-max-time="question.wpm_max_time or 0">
-            
-            <!-- Instrucciones -->
-            <div class="alert alert-primary mb-3" role="alert" t-if="question.wpm_instructions">
-                <i class="fa fa-info-circle me-2"/>
-                <span t-out="question.wpm_instructions"/>
-            </div>
-            
-            <!-- Información de la prueba -->
-            <div class="card mb-3 border-info">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4 text-center">
-                            <i class="fa fa-book fa-2x text-primary mb-2"/>
-                            <p class="mb-0">
-                                <strong><span t-out="question.wpm_word_count"/> palabras</strong><br/>
-                                <small class="text-muted">en el texto</small>
-                            </p>
-                        </div>
-                        <div class="col-md-4 text-center" t-if="question.wpm_show_timer">
-                            <i class="fa fa-clock-o fa-2x text-success mb-2"/>
-                            <p class="mb-0">
-                                <strong class="o_wpm_timer_display">00:00</strong><br/>
-                                <small class="text-muted">tiempo transcurrido</small>
-                            </p>
-                        </div>
-                        <div class="col-md-4 text-center">
-                            <i class="fa fa-tachometer fa-2x text-warning mb-2"/>
-                            <p class="mb-0">
-                                <strong class="o_wpm_current_wpm">--</strong><br/>
-                                <small class="text-muted">palabras/minuto</small>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Texto de lectura -->
-            <div class="card mb-3">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">
-                        <i class="fa fa-file-text-o me-2"/>
-                        Texto de Lectura
-                    </h5>
-                </div>
-                <div class="card-body o_wpm_reading_text" style="font-size: 16px; line-height: 1.8;">
-                    <p t-out="question.wpm_reading_text" style="white-space: pre-wrap;"/>
-                </div>
-            </div>
-            
-            <!-- Estado de la prueba -->
-            <div class="o_wpm_status_container mb-3">
-                
-                <!-- Botón de inicio -->
-                <div class="o_wpm_start_screen text-center">
-                    <button type="button" 
-                            class="btn btn-lg btn-success o_wpm_start_btn">
-                        <i class="fa fa-play me-2"/>
-                        Comenzar Lectura
-                    </button>
-                    <p class="text-muted mt-2">
-                        <small>El temporizador comenzará al presionar este botón</small>
-                    </p>
-                </div>
-                
-                <!-- Botón de finalización (oculto inicialmente) -->
-                <div class="o_wpm_reading_screen text-center" style="display: none;">
-                    <button type="button" 
-                            class="btn btn-lg btn-primary o_wpm_finish_btn">
-                        <i class="fa fa-check me-2"/>
-                        He Terminado de Leer
-                    </button>
-                    <p class="text-muted mt-2">
-                        <small>Presiona cuando hayas terminado de leer el texto completo</small>
-                    </p>
-                </div>
-                
-                <!-- Resultado (oculto inicialmente) -->
-                <div class="o_wpm_result_screen" style="display: none;">
-                    <div class="alert alert-success" role="alert">
-                        <h4 class="alert-heading">
-                            <i class="fa fa-check-circle me-2"/>
-                            ¡Completado!
-                        </h4>
-                        <hr/>
-                        <div class="row text-center">
-                            <div class="col-md-4">
-                                <h2 class="mb-0 o_wpm_final_score text-primary">--</h2>
-                                <p class="mb-0">Palabras por minuto</p>
-                            </div>
-                            <div class="col-md-4">
-                                <h2 class="mb-0 o_wpm_final_time">--</h2>
-                                <p class="mb-0">Tiempo total</p>
-                            </div>
-                            <div class="col-md-4">
-                                <h2 class="mb-0">
-                                    <span class="badge o_wpm_classification_badge">--</span>
-                                </h2>
-                                <p class="mb-0">Clasificación</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-            
-            <!-- Campos ocultos para enviar al servidor -->
-            <!-- Campo indicador de si se completó la prueba -->
-            <input type="hidden" 
-                   class="o_wpm_completed" 
-                   t-att-name="'%s_%s' % (question.id, 'wpm_completed')"
-                   value="0"/>
-            
-            <input type="hidden" 
-                   class="o_wpm_time_input" 
-                   t-att-name="'%s_%s' % (question.id, 'wpm_time')"
-                   value=""/>
-            
-            <input type="hidden" 
-                   class="o_wpm_word_count_input" 
-                   t-att-name="'%s_%s' % (question.id, 'wpm_words')"
-                   value=""/>
-            
-            <input type="hidden" 
-                   class="o_wpm_score_input" 
-                   t-att-name="'%s_%s' % (question.id, 'wpm_score')"
-                   value=""/>
-            
-            <input type="hidden" 
-                   class="o_wpm_start_timestamp" 
-                   t-att-name="'%s_%s' % (question.id, 'wpm_start')"
-                   value=""/>
-            
-            <input type="hidden" 
-                   class="o_wpm_end_timestamp" 
-                   t-att-name="'%s_%s' % (question.id, 'wpm_end')"
-                   value=""/>
-            
-        </div>
-        
+
+     <!-- Contenido principal para preguntas de lectura -->
+     <div class="o_survey_question_wpm_reading"
+          t-att-data-question-id="question.id"
+          t-att-data-word-count="question.wpm_word_count">
+
+         <div class="o_wpm_reading_text" style="font-size: 16px; line-height: 1.8;">
+          <p t-out="question.wpm_reading_text" style="white-space: pre-wrap;"/>
+         </div>
+
+         <!-- Marca invisible para validar preguntas obligatorias -->
+         <input type="hidden"
+             class="o_wpm_answer_flag"
+             t-att-name="question.id"
+             t-att-data-question-type="'char_box'"
+             value=""/>
+
+         <!-- Campos ocultos para el cálculo automático -->
+         <input type="hidden"
+             class="o_wpm_completed"
+             t-att-name="'%s_%s' % (question.id, 'wpm_completed')"
+             value="0"/>
+
+         <input type="hidden"
+             class="o_wpm_time_input"
+             t-att-name="'%s_%s' % (question.id, 'wpm_time')"
+             value=""/>
+
+         <input type="hidden"
+             class="o_wpm_word_count_input"
+             t-att-name="'%s_%s' % (question.id, 'wpm_words')"
+             value=""/>
+
+         <input type="hidden"
+             class="o_wpm_score_input"
+             t-att-name="'%s_%s' % (question.id, 'wpm_score')"
+             value=""/>
+
+         <input type="hidden"
+             class="o_wpm_start_timestamp"
+             t-att-name="'%s_%s' % (question.id, 'wpm_start')"
+             value=""/>
+
+         <input type="hidden"
+             class="o_wpm_end_timestamp"
+             t-att-name="'%s_%s' % (question.id, 'wpm_end')"
+             value=""/>
+
+     </div>
+
     </template>
 
     <!-- ================================================================== -->
@@ -169,12 +72,15 @@ Define cómo se verán las preguntas WPM en la interfaz del usuario final
     <template id="survey_question_wpm_typing" name="Survey Question: WPM Typing">
         
         <!-- Contenedor principal -->
-        <div class="js_question-wrapper o_survey_question_wpm_typing"
-             t-att-data-question-id="question.id"
-             t-att-data-show-timer="question.wpm_show_timer"
-             t-att-data-allow-paste="question.wpm_allow_paste"
-             t-att-data-min-time="question.wpm_min_time or 0"
-             t-att-data-max-time="question.wpm_max_time or 0">
+       <div class="o_survey_question_wpm_typing"
+           t-att-data-question-id="question.id"
+           t-att-data-show-timer="question.wpm_show_timer"
+           t-att-data-allow-paste="question.wpm_allow_paste"
+           t-att-data-min-time="question.wpm_min_time or 0"
+           t-att-data-max-time="question.wpm_max_time or 0"
+           t-att-data-slow-threshold="question.wpm_slow_threshold or 0"
+           t-att-data-average-threshold="question.wpm_average_threshold or 0"
+           t-att-data-fast-threshold="question.wpm_fast_threshold or 0">
             
             <!-- Instrucciones -->
             <div class="alert alert-primary mb-3" role="alert" t-if="question.wpm_instructions">
@@ -228,6 +134,7 @@ Define cómo se verán las preguntas WPM en la interfaz del usuario final
                           rows="10"
                           placeholder="Comienza a escribir... El temporizador iniciará automáticamente cuando escribas la primera palabra."
                           t-att-name="'%s_%s' % (question.id, 'answer_text')"
+                          t-att-data-question-type="'wpm_typing'"
                           style="font-size: 16px; line-height: 1.6;"></textarea>
                 <small class="text-muted" t-if="not question.wpm_allow_paste">
                     <i class="fa fa-ban text-danger me-1"/>
@@ -293,15 +200,46 @@ Define cómo se verán las preguntas WPM en la interfaz del usuario final
                    t-att-name="'%s_%s' % (question.id, 'wpm_score')"
                    value=""/>
             
-            <input type="hidden" class="o_wpm_start_timestamp" 
-                   t-att-name="'%s_%s' % (question.id, 'wpm_start')"
-                   value=""/>
-            
-            <input type="hidden" class="o_wpm_end_timestamp" 
-                   t-att-name="'%s_%s' % (question.id, 'wpm_end')"
-                   value=""/>
-            
+         <input type="hidden" class="o_wpm_start_timestamp" 
+             t-att-name="'%s_%s' % (question.id, 'wpm_start')"
+             value=""/>
+
+         <input type="hidden" class="o_wpm_end_timestamp" 
+             t-att-name="'%s_%s' % (question.id, 'wpm_end')"
+             value=""/>
+
+         <input type="hidden" class="o_wpm_typed_text_input"
+             t-att-name="'%s_%s' % (question.id, 'wpm_typed_text')"
+             value=""/>
+
+         <input type="hidden"
+             class="o_wpm_answer_flag"
+             t-att-name="question.id"
+             t-att-data-question-type="'char_box'"
+             value=""/>
+
         </div>
+        
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- INHERIT: Agregar tipos WPM al question_container                   -->
+    <!-- ================================================================== -->
+    
+    <template id="question_container_wpm_inherit" 
+              inherit_id="survey.question_container" 
+              name="Survey Question Container - WPM Types">
+        
+        <!-- Agregar llamadas a templates WPM después de los tipos estándar -->
+        <xpath expr="//t[@t-if=&quot;question.question_type == 'matrix'&quot;]" position="after">
+            <!-- Pregunta WPM de Lectura -->
+            <t t-if="question.question_type == 'wpm_reading'" 
+               t-call="survey_extension.survey_question_wpm_reading"/>
+            
+            <!-- Pregunta WPM de Escritura -->
+            <t t-if="question.question_type == 'wpm_typing'" 
+               t-call="survey_extension.survey_question_wpm_typing"/>
+        </xpath>
         
     </template>
 
