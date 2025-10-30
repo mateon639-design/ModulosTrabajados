@@ -104,6 +104,80 @@ class SurveySurvey(models.Model):
         help='Cantidad de respuestas de estudiantes'
     )
 
+    # ----------------------------------------------------------------------
+    # Campos de Cronómetro General
+    # ----------------------------------------------------------------------
+    enable_timer = fields.Boolean(
+        string="Activar cronómetro",
+        default=False,
+        help="Activa el sistema de cronómetro para esta encuesta. "
+             "El cronómetro se puede configurar a nivel general o por pregunta individual.",
+        groups="base.group_user",
+    )
+
+    timer_mode = fields.Selection(
+        selection=[
+            ('survey', 'Cronómetro general (toda la encuesta)'),
+            ('question', 'Cronómetro por pregunta'),
+            ('both', 'Ambos (general + por pregunta)'),
+        ],
+        string="Modo de cronómetro",
+        default='survey',
+        help="Modo de funcionamiento del cronómetro:\n"
+             "• General: Un solo cronómetro para toda la encuesta\n"
+             "• Por pregunta: Cronómetro individual para cada pregunta que lo tenga habilitado\n"
+             "• Ambos: Combina cronómetro general con límites individuales por pregunta",
+        groups="base.group_user",
+    )
+
+    show_timer_to_user = fields.Boolean(
+        string="Mostrar cronómetro al usuario",
+        default=True,
+        help="Si está activo, el usuario verá el tiempo corriendo en pantalla mientras responde. "
+             "Si está desactivado, el tiempo se registrará pero no será visible.",
+        groups="base.group_user",
+    )
+
+    survey_time_limit = fields.Integer(
+        string="Tiempo límite general (segundos)",
+        default=0,
+        help="Tiempo máximo en segundos para completar toda la encuesta. "
+             "0 = sin límite de tiempo. "
+             "Ejemplo: 1800 = 30 minutos",
+        groups="base.group_user",
+    )
+
+    default_question_time_limit = fields.Integer(
+        string="Tiempo límite predeterminado por pregunta (segundos)",
+        default=60,
+        help="Tiempo predeterminado que se asignará a cada pregunta cuando el modo es 'Por pregunta'. "
+             "Cada pregunta puede sobrescribir este valor con su configuración individual.",
+        groups="base.group_user",
+    )
+
+    auto_submit_on_timeout = fields.Boolean(
+        string="Enviar automáticamente al finalizar el tiempo",
+        default=False,
+        help="Si está activo, cuando se agote el tiempo límite general, "
+             "la encuesta se enviará automáticamente con las respuestas completadas hasta ese momento.",
+        groups="base.group_user",
+    )
+
+    timer_warning_threshold = fields.Integer(
+        string="Umbral de advertencia (%)",
+        default=20,
+        help="Porcentaje de tiempo restante para mostrar advertencia visual al usuario. "
+             "Ejemplo: 20 = mostrar advertencia cuando quede el 20% del tiempo o menos",
+        groups="base.group_user",
+    )
+
+    timer_sound_enabled = fields.Boolean(
+        string="Activar sonido de alerta",
+        default=False,
+        help="Emitir un sonido cuando el tiempo esté por agotarse",
+        groups="base.group_user",
+    )
+
     response_count_teachers = fields.Integer(
         string='Respuestas de Profesores',
         compute='_compute_segmentation_stats',

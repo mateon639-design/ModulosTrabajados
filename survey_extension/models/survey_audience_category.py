@@ -1,4 +1,20 @@
 # -*- coding: utf-8 -*-
+"""
+Módulo: survey_audience_category
+
+Propósito:
+    Define el modelo `survey.audience.category` que agrupa encuestas por
+    audiencias/categorías. Sirve para organizar encuestas y facilitar filtros
+    o etiquetas en la interfaz administrativa.
+
+Qué contiene:
+    - Modelo `SurveyAudienceCategory` con campos básicos (name, description,
+        sequence, color, active) y una relación Many2many hacia `survey.survey`.
+
+Notas:
+    - No contiene lógica (métodos) adicional; es principalmente un contenedor de
+        metadatos para categorizar encuestas.
+"""
 from odoo import models, fields
 
 class SurveyAudienceCategory(models.Model):

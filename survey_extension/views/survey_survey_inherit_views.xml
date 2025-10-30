@@ -102,6 +102,48 @@ NOTAS:
             </group>
           </group>
           
+          <!-- Sección de Cronómetro -->
+          <group string="⏱️ Configuración de Cronómetro">
+            <group>
+              <field name="enable_timer"
+                     string="Activar cronómetro"
+                     help="Habilita el sistema de cronómetro para esta encuesta."/>
+              <field name="timer_mode"
+                     string="Modo de cronómetro"
+                     invisible="enable_timer == False"
+                     required="enable_timer == True"
+                     help="Selecciona cómo funcionará el cronómetro."/>
+              <field name="show_timer_to_user"
+                     string="Mostrar al usuario"
+                     invisible="enable_timer == False"
+                     help="El usuario verá el tiempo corriendo en pantalla."/>
+            </group>
+            <group>
+              <field name="survey_time_limit"
+                     string="Tiempo límite general (seg)"
+                     invisible="enable_timer == False or timer_mode == 'question'"
+                     help="Tiempo máximo para toda la encuesta. 0 = sin límite."/>
+              <field name="default_question_time_limit"
+                     string="Tiempo por pregunta (seg)"
+                     invisible="enable_timer == False or timer_mode == 'survey'"
+                     help="Tiempo predeterminado por pregunta."/>
+              <field name="timer_warning_threshold"
+                     string="Umbral de advertencia (%)"
+                     invisible="enable_timer == False"
+                     help="Mostrar alerta cuando quede este % de tiempo."/>
+            </group>
+            <group colspan="2">
+              <field name="auto_submit_on_timeout"
+                     string="Enviar automáticamente al agotar tiempo"
+                     invisible="enable_timer == False or timer_mode == 'question'"
+                     help="Envía la encuesta automáticamente cuando se acabe el tiempo."/>
+              <field name="timer_sound_enabled"
+                     string="Activar sonido de alerta"
+                     invisible="enable_timer == False"
+                     help="Emitir sonido cuando el tiempo esté por agotarse."/>
+            </group>
+          </group>
+          
           <!-- Botones de análisis por segmentación -->
           <div class="oe_button_box" name="segmentation_buttons" style="margin-top: 16px;">
             <button class="oe_stat_button" 

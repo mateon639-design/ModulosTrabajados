@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Propósito: Define la vista y la acción del wizard que permite editar el
+  título de una pregunta de una encuesta de forma modal. Proporciona un
+  formulario simple con el título actual, un campo para el nuevo título y
+  botones para guardar, restaurar el original o cancelar, facilitando la
+  corrección rápida de títulos sin navegar al editor completo de la pregunta.
+-->
 <odoo>
 
   <!-- Vista de formulario para editar título de pregunta -->

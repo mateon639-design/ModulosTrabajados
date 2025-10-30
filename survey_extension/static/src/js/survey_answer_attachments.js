@@ -1,11 +1,43 @@
 /** @odoo-module **/
 
+/**
+ * File: c:\\ModulosOdoo18\\survey_extension\\static\\src\\js\\survey_answer_attachments.js
+ *
+ * Propósito:
+ *   Maneja la interfaz y la lógica del lado cliente para la gestión de
+ *   adjuntos en preguntas de encuestas públicas (Survey) en Odoo.
+ *
+ * Qué hace (resumen):
+ *   - Construye elementos DOM para mostrar adjuntos (nombre, mime, enlace).
+ *   - Gestiona zonas de adjuntos (lectura/escritura) y el contador visible.
+ *   - Sube archivos al endpoint server-side responsable de guardar adjuntos.
+ *   - Elimina adjuntos mediante RPC hacia el servidor.
+ *   - Muestra notificaciones al usuario sobre errores o estados.
+ *   - Intenta vincular un dispositivo (device_uuid + metadata) al iniciar la
+ *     participación en la encuesta para fins de auditoría/telemetría.
+ *
+ * Estructura por bloques:
+ *   - Constantes y utilidades: mensajes de error y helpers DOM/estado.
+ *   - Extensión de SurveyFormWidget: hooks para start(), next-screen y
+ *     handlers de UI para añadir/eliminar/subir adjuntos.
+ *
+ * Notas importantes:
+ *   - No altera la lógica server-side; requiere que existan los endpoints:
+ *       POST  /survey_extension/attachment/upload
+ *       RPC   /survey_extension/attachment/remove
+ *       RPC   /survey_extension/mark_start
+ *   - Se añadió documentación inline (JSDoc en español) para cada función
+ *     sin modificar su comportamiento.
+ */
+
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 
 const SurveyFormWidget = publicWidget.registry.SurveyFormWidget;
 
+// Mensajes de error usados por la UI. Las claves coinciden con errores
+// devueltos por el servidor para mapearlos a textos localizados.
 const ERROR_MESSAGES = {
     invalid_question: _t('No se reconoció la pregunta objetivo.'),
     missing_file: _t('Selecciona un archivo para continuar.'),
@@ -16,6 +48,16 @@ const ERROR_MESSAGES = {
     unsupported_question: _t('Esta pregunta no permite adjuntar archivos.'),
 };
 
+/**
+ * buildAttachmentItem(data, readonly)
+ * Construye el elemento DOM que representa un adjunto en la lista.
+ *
+ * Parámetros:
+ *  - data: objeto con { link_id, attachment_id, url, name, mimetype }
+ *  - readonly: booleano que indica si la zona es de solo lectura (sin botón eliminar)
+ *
+ * Devuelve: jQuery element con la estructura del adjunto listo para insertar.
+ */
 function buildAttachmentItem(data, readonly) {
     const $item = $('<div/>', {
         class: 'o_survey_attachment_item d-flex align-items-center gap-2',
@@ -44,6 +86,11 @@ function buildAttachmentItem(data, readonly) {
     return $item;
 }
 
+/**
+ * isReadonlyArea($area)
+ * Comprueba si una zona de adjuntos está marcada como readonly.
+ * Acepta el atributo data-readonly que puede ser booleano o string.
+ */
 function isReadonlyArea($area) {
     const value = $area.data('readonly');
     if (typeof value === 'boolean') {
@@ -55,6 +102,11 @@ function isReadonlyArea($area) {
     return false;
 }
 
+/**
+ * updateAttachmentCounter($area)
+ * Actualiza el contador oculto/visible de adjuntos relacionado a la zona.
+ * Busca el elemento `.o_survey_attachment_counter` y escribe la cantidad.
+ */
 function updateAttachmentCounter($area) {
     const $counter = $area.find('.o_survey_attachment_counter');
     if (!$counter.length) {
@@ -65,6 +117,14 @@ function updateAttachmentCounter($area) {
     $counter.val(String(count));
 }
 
+/**
+ * notify(widget, params)
+ * Envia una notificación al usuario.
+ * Primero intenta usar las utilidades del widget (displayNotification o
+ * trigger_up), y si falla muestra un alert como fallback.
+ *
+ * Params esperados: { title?, message, type? }
+ */
 function notify(widget, params) {
     if (widget && typeof widget.displayNotification === 'function') {
         widget.displayNotification(params);
@@ -82,8 +142,18 @@ function notify(widget, params) {
     window.alert(`${title}${params.message}`);
 }
 
+/*
+ * Extiende `SurveyFormWidget` para añadir soporte de adjuntos en la UI pública
+ * de encuestas. Se registran handlers para añadir/quitar archivos, inicializar
+ * zonas y para subir/eliminar adjuntos vía llamadas al servidor.
+ */
 SurveyFormWidget.include({
     start() {
+        // start(): se ejecuta al inicializar el widget de encuesta.
+        // - Asegura los handlers de adjuntos
+        // - Inicializa las áreas de adjuntos existentes
+        // - Intenta vincular el dispositivo (device UUID + metadata) llamando
+        //   al endpoint /survey_extension/mark_start mediante rpc().
         return this._super.apply(this, arguments).then(() => {
             // Asegurar UI de adjuntos
             this._ensureAttachmentHandlers();
@@ -137,12 +207,15 @@ SurveyFormWidget.include({
     },
 
     _onNextScreenDone() {
+        // Ejecutado al finalizar una pantalla; re-inicializa áreas porque la
+        // siguiente pantalla puede contener nuevas zonas de adjuntos.
         const result = this._super.apply(this, arguments);
         this._initAttachmentAreas();
         return result;
     },
 
     _ensureAttachmentHandlers() {
+        // Registra los handlers de la UI una sola vez para evitar dobles bindings.
         if (this._attachmentHandlersBound) {
             return;
         }
@@ -153,6 +226,8 @@ SurveyFormWidget.include({
     },
 
     _initAttachmentAreas() {
+        // Inicializa cada zona de adjuntos: muestra/oculta mensaje vacío,
+        // marca readonly cuando corresponda y actualiza contador.
         this.$('.o_survey_attachment_area').each((_, element) => {
             const $area = $(element);
             const hasList = $area.find('.o_survey_attachment_list').length;
@@ -169,6 +244,8 @@ SurveyFormWidget.include({
     },
 
     _onAttachmentAddClick(event) {
+        // Handler al pulsar el botón "añadir". Dispara el input[type=file]
+        // correspondiente a la zona, salvo que esté en readonly.
         event.preventDefault();
         const $area = $(event.currentTarget).closest('.o_survey_attachment_area');
         if (isReadonlyArea($area)) {
@@ -181,6 +258,8 @@ SurveyFormWidget.include({
     },
 
     async _onAttachmentInputChange(event) {
+        // Cuando el input[file] cambia, toma los archivos seleccionados y
+        // llama al método de subida. Limpia el input para permitir re-subidas.
         const $input = $(event.currentTarget);
         const $area = $input.closest('.o_survey_attachment_area');
         const files = Array.from(event.currentTarget.files || []);
@@ -192,6 +271,8 @@ SurveyFormWidget.include({
     },
 
     async _uploadAttachments($area, files) {
+        // Envía los archivos seleccionados al endpoint de subida.
+        // Valida que existan los tokens y CSRF necesarios antes de proceder.
         const surveyToken = $area.data('surveyToken');
         const answerToken = $area.data('answerToken');
         const questionId = $area.data('questionId');
@@ -219,6 +300,7 @@ SurveyFormWidget.include({
                 credentials: 'include',
             });
         } catch (error) {
+            // Notificar error de red
             notify(this, {
                 title: _t('Error de red'),
                 message: _t('No fue posible subir el archivo. Inténtalo nuevamente.'),
@@ -231,6 +313,7 @@ SurveyFormWidget.include({
         try {
             payload = await response.json();
         } catch (error) {
+            // Respuesta no JSON
             notify(this, {
                 title: _t('Error'),
                 message: _t('Respuesta inesperada del servidor.'),
@@ -239,6 +322,7 @@ SurveyFormWidget.include({
             return;
         }
 
+        // Manejo de errores según status o payload
         if (!response.ok || payload.error) {
             let message;
             if (payload && payload.error === 'file_too_large') {
@@ -257,11 +341,15 @@ SurveyFormWidget.include({
             return;
         }
 
+        // Insertar los adjuntos retornados por el servidor en la UI
         const attachments = payload.attachments || [];
         attachments.forEach((attachment) => this._appendAttachment($area, attachment));
     },
 
     _appendAttachment($area, attachment) {
+        // Inserta un nuevo elemento de adjunto en la lista (crea la lista si
+        // no existía). Respeta el modo readonly de la zona para mostrar/ocultar
+        // el botón de eliminar.
         let $list = $area.find('.o_survey_attachment_list');
         const readonly = isReadonlyArea($area);
         if (!$list.length) {
@@ -277,6 +365,8 @@ SurveyFormWidget.include({
     },
 
     async _onAttachmentRemoveClick(event) {
+        // Handler para eliminar un adjunto. Llama al RPC del servidor y, si
+        // responde OK, remueve el elemento del DOM y actualiza el contador.
         event.preventDefault();
         const $button = $(event.currentTarget);
         const $area = $button.closest('.o_survey_attachment_area');

@@ -1,5 +1,12 @@
+<!--
+    Propósito: Define las vistas (lista y formulario) y la acción para el
+    modelo `survey.device`. Permite a los usuarios ver y gestionar dispositivos
+    que se usan para responder encuestas (información básica, estadísticas,
+    información técnica del navegador y las respuestas asociadas), así como
+    ejecutar la acción de migración/asignación de respuestas desde el formulario.
+-->
 <odoo>
-    <!-- Vista tipo lista -->
+        <!-- Vista tipo lista -->
     <record id="view_survey_device_tree" model="ir.ui.view">
         <field name="name">survey.device.tree</field>
         <field name="model">survey.device</field>

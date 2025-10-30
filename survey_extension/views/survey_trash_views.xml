@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Propósito: Proveer las vistas y acciones relacionadas con la "papelera"
+  del módulo de encuestas. Este archivo define la interfaz para listar y
+  revisar encuestas eliminadas (`survey.survey.trash`), facilitar su
+  restauración, y gestionar el pool de códigos de encuesta liberados para
+  su reutilización. Incluye vistas de lista y formulario para elementos en
+  la papelera, la vista de IDs disponibles y los menús asociados para que
+  los administradores puedan revisar y recuperar encuestas borradas de
+  forma segura durante el periodo de retención.
+-->
 <odoo>
 
   <!-- Vista de la papelera de encuestas -->

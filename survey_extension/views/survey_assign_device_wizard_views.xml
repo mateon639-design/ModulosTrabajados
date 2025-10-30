@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Propósito: Este archivo define la vista del wizard que permite asignar un
+    dispositivo a respuestas de encuesta; incluye la definición del formulario
+    del wizard (campos y presentaciones para modos manual y automático), la
+    acción para abrir el wizard desde la interfaz y las pautas de presentación
+    para facilitar la migración o asociación de respuestas a dispositivos.
+-->
 <odoo>
-    <!-- Wizard para asignar dispositivos -->
+        <!-- Wizard para asignar dispositivos -->
     <record id="view_survey_assign_device_wizard_form" model="ir.ui.view">
         <field name="name">survey.assign.device.wizard.form</field>
         <field name="model">survey.assign.device.wizard</field>

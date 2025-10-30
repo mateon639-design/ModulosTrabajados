@@ -1,3 +1,30 @@
+"""
+Propósito:
+    Modelo para representar dispositivos físicos o kioscos (por ejemplo tablets
+    o terminales) que se usan para responder encuestas públicas o en sitio.
+    Su objetivo es almacenar metadata del dispositivo, facilitar auditoría y
+    permitir asignar/migrar respuestas a un dispositivo concreto.
+
+Qué contiene:
+    - Campos identificadores y de gestión: `name`, `uuid`, `active`.
+    - Localización y responsabilidad: `location`, `owner_id`.
+    - Trazabilidad de actividad: `first_seen`, `last_response_date`,
+        `total_responses` (computado) y relación `response_ids` hacia respuestas
+        (`survey.user_input`).
+    - Información técnica del cliente: `user_agent`, `browser`,
+        `operating_system`, `screen_resolution`, `viewport_resolution`,
+        `platform`, `language`, `timezone`.
+    - Métodos de utilidad:
+            - `_get_next_device_number`: ayuda a generar nombres secuenciales.
+            - `_compute_total_responses`: cuenta respuestas relacionadas.
+            - `_compute_device_info`: heurística simple para extraer navegador/SO del
+                `user_agent` y llenar `browser`/`operating_system`.
+            - `update_last_response`: aggiorna `last_response_date` y `first_seen`.
+            - `action_migrate_responses`: abre un wizard para asignar respuestas al
+                dispositivo (depende del wizard `survey.assign.device.wizard`).
+
+"""
+
 from odoo import models, fields, api
 import uuid
 import re

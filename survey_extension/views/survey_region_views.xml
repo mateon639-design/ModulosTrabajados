@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Propósito: Este archivo define las vistas y la acción para gestionar el
+    modelo `survey.region` (lista, formulario, kanban y búsqueda). Permite a
+    los usuarios crear y organizar regiones geográficas o segmentaciones para
+    participantes, visualizar estadísticas (participantes y encuestas por
+    región), navegar rápidamente a participantes/encuestas relacionadas y
+    filtrar/agrupar regiones desde la interfaz. Está pensado para facilitar
+    la segmentación y el análisis de resultados por región.
+-->
 <odoo>
     <!-- ========================================
          Vista List: Lista de Regiones

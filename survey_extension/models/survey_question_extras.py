@@ -175,6 +175,69 @@ class SurveyQuestion(models.Model):
     )
 
     # ========================================================================
+    # CAMPOS DE CRONÓMETRO POR PREGUNTA
+    # ========================================================================
+    
+    enable_question_timer = fields.Boolean(
+        string="Activar cronómetro en esta pregunta",
+        default=False,
+        help="Activa un cronómetro específico para esta pregunta. "
+             "El usuario verá el tiempo corriendo mientras responde esta pregunta.",
+    )
+
+    question_time_limit = fields.Integer(
+        string="Tiempo límite (segundos)",
+        default=60,
+        help="Tiempo máximo en segundos para responder esta pregunta. "
+             "0 = sin límite de tiempo. "
+             "Ejemplo: 120 = 2 minutos",
+    )
+
+    show_question_timer = fields.Boolean(
+        string="Mostrar cronómetro al usuario",
+        default=True,
+        help="Si está activo, el usuario verá el cronómetro de esta pregunta en pantalla. "
+             "Si está desactivado, el tiempo se registrará pero no será visible.",
+    )
+
+    timer_action_on_timeout = fields.Selection(
+        selection=[
+            ('none', 'No hacer nada (solo alertar)'),
+            ('block', 'Bloquear pregunta'),
+            ('auto_next', 'Pasar automáticamente a la siguiente'),
+            ('auto_submit', 'Enviar respuesta actual'),
+        ],
+        string="Acción al agotar tiempo",
+        default='none',
+        help="Qué hacer cuando se acabe el tiempo de esta pregunta:\n"
+             "• No hacer nada: Solo mostrar alerta, el usuario puede continuar\n"
+             "• Bloquear pregunta: Deshabilitar campos de respuesta\n"
+             "• Pasar automáticamente: Ir a la siguiente pregunta\n"
+             "• Enviar respuesta: Guardar la respuesta actual y continuar",
+    )
+
+    timer_warning_percentage = fields.Integer(
+        string="Advertencia al (%)",
+        default=25,
+        help="Porcentaje de tiempo restante para mostrar advertencia. "
+             "Ejemplo: 25 = advertir cuando quede el 25% del tiempo",
+    )
+
+    allow_overtime = fields.Boolean(
+        string="Permitir tiempo extra",
+        default=False,
+        help="Si está activo, el usuario puede continuar respondiendo después de que se agote el tiempo, "
+             "pero se registrará que excedió el límite.",
+    )
+
+    track_time_per_attempt = fields.Boolean(
+        string="Rastrear tiempo por intento",
+        default=True,
+        help="Registrar el tiempo exacto que el usuario dedicó a esta pregunta. "
+             "Útil para análisis de rendimiento y estadísticas.",
+    )
+
+    # ========================================================================
     # MÉTODOS (FUNCIONES)
     # ========================================================================
     

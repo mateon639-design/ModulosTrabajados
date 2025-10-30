@@ -2,6 +2,11 @@
 /**
  * Lógica frontend para preguntas WPM (lectura y escritura).
  * Calcula palabras por minuto y sincroniza los datos con el backend.
+ * 
+ * INTEGRACIÓN CON CRONÓMETRO:
+ * - Compatible con el sistema de cronómetro general y por pregunta
+ * - El tiempo WPM se sincroniza con el cronómetro de pregunta si está activo
+ * - Respeta los límites de tiempo configurados
  */
 
 import publicWidget from "@web/legacy/js/public/public_widget";

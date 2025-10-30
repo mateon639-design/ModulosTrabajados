@@ -83,6 +83,9 @@
             "survey_extension/static/src/js/survey_conditional_questions.js",
             "survey_extension/static/src/js/survey_answer_attachments.js",
             "survey_extension/static/src/js/survey_wpm_questions.js",
+            # Sistema de cronómetro
+            "survey_extension/static/src/js/survey_timer.js",
+            "survey_extension/static/src/css/survey_timer.css",
             "survey_extension/static/src/scss/survey_extension.scss",
         ],
         # Backend (vistas Odoo / dashboards)

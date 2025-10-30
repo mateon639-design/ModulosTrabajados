@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Propósito: Define las vistas del wizard que facilita la creación de una
+  nueva versión de una encuesta. Incluye la lista y el formulario de las
+  líneas del wizard (preguntas disponibles) y el formulario principal donde
+  se seleccionan el título, el año y las preguntas a incluir en la nueva
+  versión. Sirve para copiar y ajustar preguntas antes de generar una
+  versión final de la encuesta.
+-->
 <odoo>
 
   <record id="survey_version_wizard_line_view_list" model="ir.ui.view">
